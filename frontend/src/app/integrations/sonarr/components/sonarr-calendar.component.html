@@ -1,0 +1,58 @@
+<app-widget-card title="Airing Next" subtitle="From Sonarr" accentColor="text-blue-400">
+    <div header-icon class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3">
+            <path fill-rule="evenodd"
+                d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z"
+                clip-rule="evenodd" />
+        </svg>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 space-y-3">
+        @if (loading()) {
+        <div class="animate-pulse space-y-3">
+            <div class="h-24 bg-white/5 rounded-2xl"></div>
+            <div class="h-24 bg-white/5 rounded-2xl"></div>
+        </div>
+        }
+
+        @for (episode of episodes(); track episode.id) {
+        <div
+            class="flex gap-4 p-3 bg-slate-800/50 rounded-2xl hover:bg-slate-800 transition group/item border border-white/5">
+            <!-- Series/Episode Image -->
+            <div class="w-32 aspect-[16/9] relative rounded-xl overflow-hidden flex-shrink-0 bg-slate-900">
+                <!-- Ideally we'd have an episode image here, falling back to fanart -->
+                <!-- For now, using series fanart or placeholder -->
+                <img *ngIf="getFanart(episode.series)" [ngSrc]="getFanart(episode.series!)" width="128" height="72"
+                    class="w-full h-full object-cover opacity-80 group-hover/item:opacity-100 transition"
+                    alt="{{ episode.series?.title }}" />
+            </div>
+
+            <div class="flex-1 min-w-0 py-1 flex flex-col justify-center">
+                <h4 class="text-white font-bold text-lg truncate group-hover/item:text-blue-400 transition">{{
+                    episode.series?.title }}</h4>
+                <p class="text-slate-400 text-sm truncate mb-1">
+                    {{ episode.seasonNumber }}x{{ episode.episodeNumber }} • {{ episode.title }}
+                </p>
+                <div class="text-sm font-medium flex items-center gap-1.5">
+                    <span class="text-blue-400">
+                        {{ episode.airDateUtc | date:'EEEE' }}
+                    </span>
+                    <span class="text-slate-600">•</span>
+                    <span class="text-blue-400">
+                        {{ episode.airDateUtc | date:'HH:mm' }}
+                    </span>
+                    @if (episode.series?.network) {
+                    <span class="text-slate-500">on {{ episode.series?.network }}</span>
+                    }
+                </div>
+            </div>
+        </div>
+        }
+
+        @if (!loading() && episodes().length === 0) {
+        <div class="text-center text-slate-500 py-8">
+            No episodes airing soon
+        </div>
+        }
+    </div>
+</app-widget-card>

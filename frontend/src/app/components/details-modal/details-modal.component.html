@@ -1,0 +1,159 @@
+@if (isOpen) {
+<div class="fixed inset-0 z-40 flex items-center justify-center p-4">
+    <!-- Backdrop Blur -->
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-xl transition-all duration-300" (click)="onClose()"></div>
+
+    <!-- Modal Content -->
+    <div
+        class="relative bg-slate-900 border border-slate-700 w-full max-w-5xl h-[85vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-enter">
+
+        <!-- Close Button -->
+        <button (click)="onClose()"
+            class="absolute top-4 right-4 z-50 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white backdrop-blur-md transition">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        @if (loading()) {
+        <div class="absolute inset-0 flex items-center justify-center text-white">
+            <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+        </div>
+        } @else {
+
+        <!-- Main Content Area (Scrollable Info + Poster) -->
+        <div class="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
+
+            <!-- Left: Poster -->
+            <div class="w-full md:w-1/3 lg:w-1/4 h-64 md:h-full relative shrink-0">
+                <img [src]="getPoster()" class="w-full h-full object-cover opacity-80" />
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-slate-900/80">
+                </div>
+            </div>
+
+            <!-- Right: Info -->
+            <div class="flex-1 flex flex-col p-8 md:pl-8 relative overflow-y-auto custom-scrollbar min-w-0">
+
+                <!-- Background Fade -->
+                <div class="absolute top-0 right-0 w-full h-96 -z-10 opacity-20 pointer-events-none">
+                    <img [src]="getBackdrop()" class="w-full h-full object-cover mask-image-b" />
+                </div>
+
+                <!-- Header -->
+                <div class="mb-6">
+                    <h1 class="text-4xl font-bold text-white mb-2 leading-tight">{{ details()?.title }}</h1>
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-slate-400 font-medium">
+                        <span class="bg-slate-800 text-white px-2 py-1 rounded border border-slate-700">{{
+                            details()?.year
+                            }}</span>
+                        @if (details()?.runtime) {
+                        <span>{{ details()?.runtime }} min</span>
+                        }
+                        @if (details()?.certification) {
+                        <span class="border border-slate-600 px-1 rounded">{{ details()?.certification }}</span>
+                        }
+                        <div class="flex items-center gap-1 text-yellow-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                class="w-4 h-4">
+                                <path fill-rule="evenodd"
+                                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.005Z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span>{{ details()?.rating | number:'1.1-1' }}</span>
+                        </div>
+
+                        @if (details()?.genres?.length) {
+                        <div class="w-px h-4 bg-slate-700 mx-1"></div>
+                        <div class="flex items-center gap-1.5">
+                            @for (genre of details()?.genres | slice:0:3; track genre) {
+                            <span
+                                class="px-2.5 py-0.5 rounded-full bg-slate-800/80 border border-slate-700/50 text-xs font-medium text-slate-300 shadow-sm backdrop-blur-sm">
+                                {{ $any(genre) | titlecase }}
+                            </span>
+                            }
+                        </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-4 mb-8">
+                    @if (inLibrary()) {
+                    <div
+                        class="flex items-center gap-2 px-4 py-2 bg-green-500/10 text-green-400 rounded-full border border-green-500/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                            <path fill-rule="evenodd"
+                                d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <span class="font-bold">In Library</span>
+                    </div>
+                    } @else {
+                    <button (click)="showAddModal = true"
+                        class="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-bold shadow-lg shadow-blue-900/20 transition hover:scale-105 active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                            <path
+                                d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+                        </svg>
+                        Add to {{ type === 'movie' ? 'Radarr' : 'Sonarr' }}
+                    </button>
+                    }
+                </div>
+
+                <!-- Plot -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-bold text-white mb-2">Overview</h3>
+                    <p class="text-slate-300 leading-relaxed">{{ details()?.overview }}</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Footer: Cast (Fixed Bottom) -->
+        <div class="shrink-0 bg-slate-950/50 backdrop-blur-md border-t border-white/5 p-4 z-10 w-full">
+            <h3 class="text-sm font-bold text-slate-400 mb-3 px-1 uppercase tracking-wider">Cast</h3>
+            <div class="grid grid-rows-1 grid-flow-col auto-cols-max gap-4 overflow-x-auto scrollbar-hide w-full px-1">
+                <div class="grid grid-rows-2 grid-flow-col auto-cols-max gap-x-4 gap-y-2">
+                    @for (person of people()?.cast; track person.person.ids.trakt) {
+                    <div class="flex items-center gap-3 w-48 pr-4">
+                        <div
+                            class="w-10 h-10 shrink-0 rounded-full overflow-hidden bg-slate-800 border border-slate-700 relative">
+                            @if (getHeadshot(person)) {
+                            <img [src]="getHeadshot(person)" class="w-full h-full object-cover" loading="lazy" />
+                            } @else {
+                            <div
+                                class="w-full h-full flex items-center justify-center text-slate-500 text-[10px] font-bold">
+                                {{ person.person.name.charAt(0) }}
+                            </div>
+                            }
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-white text-xs font-bold truncate">{{ person.person.name }}</p>
+                            <p class="text-slate-500 text-[10px] truncate">{{ person.character }}</p>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        }
+    </div>
+
+    <!-- Add Modal -->
+    @if (showAddModal) {
+    <app-add-media-modal [type]="type" [tmdbId]="details()?.ids?.tmdb" [title]="details()?.title"
+        [year]="details()?.year" (cancelled)="showAddModal = false"
+        (added)="showAddModal = false; inLibrary.set(true)"></app-add-media-modal>
+    }
+
+</div>
+}

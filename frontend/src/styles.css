@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+}
+
+html,
+body {
+  @apply bg-slate-950 text-slate-200 h-full font-sans antialiased;
+}
+
+/* Modern Scrollbar */
+@layer utilities {
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.slate.700') transparent;
+  }
+
+  /* Chrome, Edge, and Safari */
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    @apply bg-slate-700 rounded-full border-2 border-slate-950;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-600;
+  }
+
+  /* Utility to hide scrollbar but keep functionality (for horizontal widgets) */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

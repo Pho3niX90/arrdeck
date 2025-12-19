@@ -1,0 +1,31 @@
+services:
+  arrdeck:
+    build: .
+    ports:
+      - "4877:4877"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=arrdeck
+      - DB_PASSWORD=arrdeck
+      - DB_DATABASE=arrdeck
+      # This will be used by NestJS to serve static files
+      - CLIENT_PATH=/app/client
+    depends_on:
+      - postgres
+    restart: always
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=arrdeck
+      - POSTGRES_PASSWORD=arrdeck
+      - POSTGRES_DB=arrdeck
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: always
+
+volumes:
+  postgres_data:

@@ -1,0 +1,81 @@
+<app-widget-card [title]="'AI Recommendations'" [subtitle]="type() === 'sonarr' ? 'TV Shows' : 'Movies'"
+    accentColor="text-purple-400">
+
+    <div header-icon class="text-purple-400">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+            <path fill-rule="evenodd"
+                d="M9.315 7.584C12.195 3.883 16.695 1.5 21.75 1.5a.75.75 0 0 1 .75.75c0 5.056-2.383 9.555-6.084 12.436A6.753 6.753 0 0 1 9.75 22.5a.75.75 0 0 1-.75-.75v-4.131A15.838 15.838 0 0 1 6.382 15H2.25a.75.75 0 0 1-.75-.75 6.75 6.75 0 0 1 7.815-6.666ZM15 16.5a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0ZM16.5 12a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5Z"
+                clip-rule="evenodd" />
+        </svg>
+    </div>
+
+    <!-- Header Actions -->
+    <div header-actions class="flex items-center gap-2">
+        <button (click)="generate()" [disabled]="loading()"
+            class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors flex items-center gap-2 shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            [title]="loading() ? 'Generating...' : 'Generate New Ideas'">
+            <span *ngIf="loading()" class="animate-spin">
+                <svg class="h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+            </span>
+            <span class="hidden sm:inline">{{ loading() ? 'Thinking...' : (enriching() ? 'Enriching...' : 'Generate')
+                }}</span>
+            <span class="sm:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-4 h-4">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+            </span>
+        </button>
+        <button (click)="togglePrompt()"
+            class="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition-colors border border-white/5"
+            title="Custom Prompt">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+            </svg>
+        </button>
+    </div>
+
+    <div class="p-6 h-full overflow-y-auto custom-scrollbar flex flex-col gap-4">
+
+        <!-- Controls (Just Input) -->
+        <div *ngIf="showPromptInput()" class="animate-fade-in-down mb-2">
+            <textarea [(ngModel)]="customPrompt"
+                class="w-full bg-slate-900/50 border border-white/10 rounded-lg p-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50 transition-colors"
+                rows="2" placeholder="e.g. 'Space operas with complex politics' or '80s action movies'"></textarea>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="error()"
+            class="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+            {{ error() }}
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!loading() && recommendations().length === 0 && !error()"
+            class="flex flex-col items-center justify-center py-10 text-slate-500">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="w-12 h-12 mb-3 opacity-50">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+            </svg>
+            <p>Ready to find your next obsession?</p>
+        </div>
+
+        <!-- Recommendations Carousel -->
+        <div *ngIf="recommendations().length > 0" class="min-h-[250px]">
+            <app-media-carousel [items]="mediaItems()"></app-media-carousel>
+        </div>
+
+    </div>
+
+    <app-details-modal></app-details-modal>
+
+</app-widget-card>

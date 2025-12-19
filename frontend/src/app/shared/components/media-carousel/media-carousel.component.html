@@ -1,0 +1,8 @@
+<div #scrollContainer class="flex-1 overflow-x-auto p-4 flex gap-4 min-h-0 scrollbar-hide items-start h-full"
+    appHorizontalScroll (mouseenter)="pause()" (mouseleave)="resume()" (touchstart)="pause()" (touchend)="resume()">
+
+    @for (item of items(); track item.id) {
+    <app-media-card [item]="item"></app-media-card>
+    }
+
+</div>

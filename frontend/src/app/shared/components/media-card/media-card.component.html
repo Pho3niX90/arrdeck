@@ -1,0 +1,91 @@
+<div class="media-card group/media relative flex-shrink-0 cursor-pointer w-32 flex flex-col gap-2"
+    (click)="item().clickAction && item().clickAction!()">
+
+    <!-- Poster Container -->
+    <div class="aspect-[2/3] relative rounded-xl overflow-hidden bg-slate-800 shadow-lg transition-all duration-300 group-hover/media:scale-[1.02]"
+        [class.hover-shadow]="!!item().accentColor">
+
+        <!-- Image -->
+        <img [ngSrc]="item().imageUrl" width="128" height="192" class="w-full h-full object-cover"
+            alt="{{ item().title }}" />
+
+        <!-- Top Right Badge -->
+        @if (item().topRightBadge; as badge) {
+        <div class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md backdrop-blur-sm text-[10px] font-bold border border-white/10 flex items-center gap-1 shadow-sm"
+            [class]="badge.colorClass || 'bg-black/70 text-white'">
+            @if (badge.iconHtml) {
+            <span [innerHTML]="badge.iconHtml | safeHtml" class="w-2.5 h-2.5 flex items-center justify-center"></span>
+            }
+            @if (badge.text) {
+            <span>{{ badge.text }}</span>
+            }
+        </div>
+        }
+
+        <!-- Top Left Badge -->
+        @if (item().topLeftBadge; as badge) {
+        <div class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-md backdrop-blur-sm text-[10px] font-bold border border-white/10 flex items-center gap-1 shadow-sm"
+            [class]="badge.colorClass || 'bg-black/70 text-white'">
+            @if (badge.iconHtml) {
+            <span [innerHTML]="badge.iconHtml | safeHtml" class="w-2.5 h-2.5 flex items-center justify-center"></span>
+            }
+            @if (badge.text) {
+            <span>{{ badge.text }}</span>
+            }
+        </div>
+        }
+
+        <!-- Bottom Overlay (e.g. Time Ago) -->
+        @if (item().bottomOverlay; as overlay) {
+        @if (overlay.location === 'bottom') {
+        <div class="absolute bottom-0 inset-x-0 p-2 bg-gradient-to-t from-black/90 to-transparent pt-6">
+            <div class="text-[10px] text-slate-300 font-medium truncate text-center">
+                {{ overlay.text }}
+            </div>
+        </div>
+        }
+        }
+
+        <!-- Source Icons (Recommendations) -->
+        @if (item().sourceIcons; as icons) {
+        <div class="absolute bottom-1.5 left-1.5 flex items-center -space-x-1.5 pointer-events-none">
+            @for (icon of icons; track $index) {
+            <div [innerHTML]="icon.html | safeHtml" [title]="icon.title"
+                class="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center p-1 text-white shadow-sm z-20 first:ml-0 relative pointer-events-auto cursor-help"
+                style="z-index: {{ 20 - $index }}"></div>
+            }
+        </div>
+        }
+
+        <!-- Center Overlay (Hover) - e.g. Trakt details -->
+        @if (item().bottomOverlay; as overlay) {
+        @if (overlay.location === 'center') {
+        <div
+            class="absolute inset-0 bg-black/60 opacity-0 group-hover/media:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 text-center">
+            <span class="text-white text-xs font-bold line-clamp-2">{{ item().title }}</span>
+            @if (item().subtitle) {
+            <span class="text-slate-300 text-xs mt-1">{{ item().subtitle }}</span>
+            }
+            @if (overlay.text) {
+            <span class="text-xs mt-1" [class]="item().accentColor || 'text-white'">{{ overlay.text }}</span>
+            }
+        </div>
+        }
+        }
+
+    </div>
+
+    @if (!item().bottomOverlay || item().bottomOverlay?.location !== 'center') {
+    <div class="px-0.5 mt-1">
+        <div class="flex flex-col gap-0.5">
+            <h4 class="font-medium text-white text-[11px] leading-tight line-clamp-2 transition"
+                [class]="'group-hover/media:' + (item().accentColor || 'text-white')" title="{{ item().title }}">
+                {{ item().title }}
+            </h4>
+            @if (item().subtitle) {
+            <span class="text-[10px] text-slate-500 font-mono">{{ item().subtitle }}</span>
+            }
+        </div>
+    </div>
+    }
+</div>
