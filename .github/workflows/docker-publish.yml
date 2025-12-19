@@ -17,7 +17,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-      description: write # for tagging
 
     steps:
       - name: Checkout repository
