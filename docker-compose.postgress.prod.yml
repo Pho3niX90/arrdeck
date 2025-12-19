@@ -12,6 +12,18 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-arrdeck}
       - DB_DATABASE=${DB_DATABASE:-arrdeck}
       - CLIENT_PATH=/app/client
+    depends_on:
+      - postgres
+    restart: always
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${DB_USERNAME:-arrdeck}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-arrdeck}
+      - POSTGRES_DB=${DB_DATABASE:-arrdeck}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     restart: always
 
 volumes:

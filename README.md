@@ -45,11 +45,32 @@ ArrDeck is a monorepo consisting of a NestJS backend and Angular frontend.
 *   Node.js (v18+)
 *   Docker & Docker Compose (optional, for full stack)
 
-### Quick Start (Docker)
-The easiest way to run ArrDeck is with Docker Compose, which spins up the app and a Postgres database.
+### Deployment Options
 
+ArrDeck provides 4 different Docker Compose configurations to suit your needs:
+
+#### 1. Full Stack Development
+Runs the full stack (Frontend, Backend, Database) and builds from local source. Best for development.
 ```bash
-docker-compose up --build
+docker compose up --build
+```
+
+#### 2. Production (GHCR Image)
+Runs the full stack but pulls the pre-built image from GitHub Container Registry. Best for usage.
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
+
+#### 3. Database Only (Development)
+Runs only the PostgreSQL database. Useful if you are running the backend/frontend locally via `npm run start:dev`.
+```bash
+docker compose -f docker-compose.postgress.yml up -d
+```
+
+#### 4. Database Only (Production)
+Runs only the PostgreSQL database with production settings. Useful if you are running the binary/jar standalone but want a containerized DB.
+```bash
+docker compose -f docker-compose.postgress.prod.yml up -d
 ```
 
 Access the app at `http://localhost:3000`.

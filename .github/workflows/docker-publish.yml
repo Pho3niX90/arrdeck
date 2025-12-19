@@ -2,7 +2,7 @@ name: Docker
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
   # Allow manual trigger
   workflow_dispatch:
 
