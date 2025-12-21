@@ -1,42 +1,43 @@
 <app-widget-card title="Top Rated Library" subtitle="From Radarr" accentColor="text-amber-400">
-    <div header-icon class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center">
-        <!-- Star Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3">
-            <path fill-rule="evenodd"
-                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.17c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006Z"
-                clip-rule="evenodd" />
-        </svg>
-    </div>
+  <div header-icon class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center">
+    <!-- Star Icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3">
+      <path fill-rule="evenodd"
+            d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.17c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006Z"
+            clip-rule="evenodd"/>
+    </svg>
+  </div>
 
-    <div class="flex-1 overflow-y-auto p-4 space-y-3">
-        @for (movie of movies(); track movie.id) {
-        <div
-            class="flex gap-4 p-3 bg-slate-800/50 rounded-2xl hover:bg-slate-800 transition group/item border border-white/5">
-            <!-- Poster -->
-            <div class="w-16 aspect-[2/3] relative rounded-lg overflow-hidden flex-shrink-0 bg-slate-900">
-                <img [ngSrc]="getPoster(movie)" width="64" height="96" class="w-full h-full object-cover"
-                    alt="{{ movie.title }}" />
-            </div>
+  <div class="flex-1 overflow-y-auto p-4 space-y-3">
+    @for (movie of movies(); track movie.id) {
+      <div
+        class="flex gap-4 p-3 bg-slate-800/50 rounded-2xl hover:bg-slate-800 transition group/item border border-white/5">
+        <!-- Poster -->
+        <div class="w-16 aspect-[2/3] relative rounded-lg overflow-hidden flex-shrink-0 bg-slate-900">
+          <img [ngSrc]="getPoster(movie) | tmdbImage:'w185':'poster'" width="64" height="96"
+               class="w-full h-full object-cover" alt="{{ movie.title }}"/>
+        </div>
 
-            <div class="flex-1 min-w-0 py-1 flex flex-col justify-center">
-                <h4 class="text-white font-bold text-base truncate group-hover/item:text-amber-400 transition">{{
-                    movie.title }}</h4>
-                <div class="flex items-center gap-2 mt-1">
+        <div class="flex-1 min-w-0 py-1 flex flex-col justify-center">
+          <h4 class="text-white font-bold text-base truncate group-hover/item:text-amber-400 transition">{{
+              movie.title
+            }}</h4>
+          <div class="flex items-center gap-2 mt-1">
                     <span
-                        class="text-xs font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/10">
+                      class="text-xs font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/10">
                         {{ movie.ratings.value }}
                     </span>
-                    <span class="text-slate-500 text-xs">{{ movie.year }}</span>
-                    @if (movie.genres.length) {
-                    <span class="text-slate-600 text-xs">•</span>
-                    <span class="text-slate-500 text-xs truncate">{{ movie.genres[0] }}</span>
-                    }
-                </div>
-                <p class="text-slate-400 text-xs line-clamp-2 mt-1.5 leading-relaxed">
-                    {{ movie.overview }}
-                </p>
-            </div>
+            <span class="text-slate-500 text-xs">{{ movie.year }}</span>
+            @if (movie.genres.length) {
+              <span class="text-slate-600 text-xs">•</span>
+              <span class="text-slate-500 text-xs truncate">{{ movie.genres[0] }}</span>
+            }
+          </div>
+          <p class="text-slate-400 text-xs line-clamp-2 mt-1.5 leading-relaxed">
+            {{ movie.overview }}
+          </p>
         </div>
-        }
-    </div>
+      </div>
+    }
+  </div>
 </app-widget-card>

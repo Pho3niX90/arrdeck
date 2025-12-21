@@ -1,0 +1,56 @@
+<app-widget-card [title]="'System Health'" [subtitle]="'Servers & Storage'">
+  <div class="space-y-4 max-h-[22rem] overflow-y-auto px-1 custom-scrollbar">
+    @if (loading()) {
+      <div class="flex items-center justify-center py-8">
+        <svg class="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+             viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+      </div>
+    } @else {
+      @for (system of systems(); track system.serviceId) {
+        <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/50">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full" [class.bg-green-500]="!system.error"
+                   [class.bg-red-500]="system.error"></div>
+              <h4 class="font-medium text-slate-200">{{ system.name }}</h4>
+              <span class="text-xs text-slate-500 border border-slate-700 rounded px-1">{{
+                  system.version ||
+                  'Unknown'
+                }}</span>
+            </div>
+            <span class="text-xs text-slate-500 capitalize">{{ system.type }}</span>
+          </div>
+
+          @if (system.diskSpace && system.diskSpace.length > 0) {
+            <div class="space-y-3">
+              @for (disk of system.diskSpace; track disk.path) {
+                <div>
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="text-slate-400 truncate max-w-[150px]" [title]="disk.path">{{ disk.path }}</span>
+                    <span class="text-slate-300 font-mono">
+                            {{ formatBytes(disk.freeSpace) }} free of {{ formatBytes(disk.totalSpace) }}
+                        </span>
+                  </div>
+                  <!-- Progress Bar -->
+                  <div class="w-full bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
+                    <div class="h-1.5 rounded-full transition-all duration-500" [ngClass]="getUsageColor(disk)"
+                         [style.width.%]="getUsagePercent(disk)">
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="text-xs text-slate-500 italic">No disk information available</div>
+          }
+        </div>
+      }
+      @if (systems().length === 0) {
+        <div class="text-center text-slate-500 py-4 text-sm">No services configured.</div>
+      }
+    }
+  </div>
+</app-widget-card>

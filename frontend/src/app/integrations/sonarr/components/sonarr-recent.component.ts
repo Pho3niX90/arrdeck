@@ -1,28 +1,31 @@
-import { Component, Input, OnInit, inject, signal, computed, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { SonarrDataService } from '../sonarr.data.service';
-import { SonarrSeries } from '../sonarr.models';
-import { WidgetCardComponent } from '../../../components/widget-card/widget-card.component';
-import { MediaCarouselComponent } from '../../../shared/components/media-carousel/media-carousel.component';
-import { MediaItem } from '../../../shared/models/media-item.model';
-import { TimeAgoPipe } from '../../../pipes/time-ago.pipe';
-import { DetailsModalComponent } from '../../../components/details-modal/details-modal.component';
+import {Component, computed, inject, Input, OnInit, signal, ViewChild} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {SonarrDataService} from '../sonarr.data.service';
+import {SonarrSeries} from '../sonarr.models';
+import {WidgetCardComponent} from '../../../components/widget-card/widget-card.component';
+import {MediaCarouselComponent} from '../../../shared/components/media-carousel/media-carousel.component';
+import {MediaItem} from '../../../shared/models/media-item.model';
+import {TimeAgoPipe} from '../../../pipes/time-ago.pipe';
+import {DetailsModalComponent} from '../../../components/details-modal/details-modal.component';
+
+import {TmdbImagePipe} from '../../../pipes/tmdb-image.pipe';
 
 @Component({
   selector: 'app-sonarr-recent',
   standalone: true,
   imports: [CommonModule, WidgetCardComponent, MediaCarouselComponent, DetailsModalComponent],
-  providers: [TimeAgoPipe],
+  providers: [TimeAgoPipe, TmdbImagePipe],
   templateUrl: './sonarr-recent.component.html',
   styles: ``
 })
 export class SonarrRecentComponent implements OnInit {
-  @Input({ required: true }) serviceId!: number;
+  @Input({required: true}) serviceId!: number;
 
   @ViewChild(DetailsModalComponent) detailsModal!: DetailsModalComponent;
 
   private dataService = inject(SonarrDataService);
   private timeAgoPipe = inject(TimeAgoPipe);
+  private tmdbImagePipe = inject(TmdbImagePipe);
 
   shows = signal<SonarrSeries[]>([]);
 
@@ -44,7 +47,7 @@ export class SonarrRecentComponent implements OnInit {
     return {
       id: show.id,
       title: show.title,
-      imageUrl: poster,
+      imageUrl: this.tmdbImagePipe.transform(poster, 'w185'),
       clickAction: () => this.openDetails(show),
       accentColor: 'text-emerald-400',
       topRightBadge: show.ratings?.value ? {

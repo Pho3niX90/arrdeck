@@ -14,7 +14,8 @@
         <button (click)="generate()" [disabled]="loading()"
             class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors flex items-center gap-2 shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             [title]="loading() ? 'Generating...' : 'Generate New Ideas'">
-            <span *ngIf="loading()" class="animate-spin">
+            @if (loading()) {
+            <span class="animate-spin">
                 <svg class="h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor"
@@ -22,6 +23,7 @@
                     </path>
                 </svg>
             </span>
+            }
             <span class="hidden sm:inline">{{ loading() ? 'Thinking...' : (enriching() ? 'Enriching...' : 'Generate')
                 }}</span>
             <span class="sm:hidden">
@@ -46,21 +48,24 @@
     <div class="p-6 h-full overflow-y-auto custom-scrollbar flex flex-col gap-4">
 
         <!-- Controls (Just Input) -->
-        <div *ngIf="showPromptInput()" class="animate-fade-in-down mb-2">
+        @if (showPromptInput()) {
+        <div class="animate-fade-in-down mb-2">
             <textarea [(ngModel)]="customPrompt"
                 class="w-full bg-slate-900/50 border border-white/10 rounded-lg p-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50 transition-colors"
                 rows="2" placeholder="e.g. 'Space operas with complex politics' or '80s action movies'"></textarea>
         </div>
+        }
 
         <!-- Error State -->
-        <div *ngIf="error()"
-            class="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+        @if (error()) {
+        <div class="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
             {{ error() }}
         </div>
+        }
 
         <!-- Empty State -->
-        <div *ngIf="!loading() && recommendations().length === 0 && !error()"
-            class="flex flex-col items-center justify-center py-10 text-slate-500">
+        @if (!loading() && recommendations().length === 0 && !error()) {
+        <div class="flex flex-col items-center justify-center py-10 text-slate-500">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="w-12 h-12 mb-3 opacity-50">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -68,11 +73,14 @@
             </svg>
             <p>Ready to find your next obsession?</p>
         </div>
+        }
 
         <!-- Recommendations Carousel -->
-        <div *ngIf="recommendations().length > 0" class="min-h-[250px]">
+        @if (recommendations().length > 0) {
+        <div class="min-h-[250px]">
             <app-media-carousel [items]="mediaItems()"></app-media-carousel>
         </div>
+        }
 
     </div>
 

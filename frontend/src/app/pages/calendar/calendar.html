@@ -1,0 +1,108 @@
+<div class="h-full flex flex-col max-w-[1600px] mx-auto">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-lg bg-indigo-600/20 flex items-center justify-center text-indigo-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold text-white">Calendar</h1>
+        <p class="text-slate-400 text-sm">Upcoming releases</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-4 bg-[#1e2030] rounded-lg p-1 border border-slate-700/50">
+      <button (click)="changeMonth(-1)"
+              class="p-2 hover:bg-slate-700/50 rounded-md text-slate-400 hover:text-white transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd"
+                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                clip-rule="evenodd"/>
+        </svg>
+      </button>
+      <span class="text-white font-medium min-w-[140px] text-center">{{ monthName() }}</span>
+      <button (click)="changeMonth(1)"
+              class="p-2 hover:bg-slate-700/50 rounded-md text-slate-400 hover:text-white transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clip-rule="evenodd"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Calendar Grid -->
+  @if (isLoading()) {
+    <div class="flex-1 flex items-center justify-center min-h-[400px]">
+      <div class="text-slate-500 animate-pulse">Loading events...</div>
+    </div>
+  } @else {
+    <div class="bg-[#151621] rounded-xl border border-slate-700/50 overflow-hidden flex flex-col shadow-xl">
+      <!-- Headers -->
+      <div class="grid grid-cols-7 border-b border-slate-700/50 bg-[#1e2030]">
+        @for (day of ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; track day) {
+          <div class="py-3 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            {{ day }}
+          </div>
+        }
+      </div>
+
+      <!-- Days -->
+      <div class="grid grid-cols-7 auto-rows-fr">
+        @for (date of daysInMonth(); track $index) {
+          <div
+            class="min-h-[140px] border-b border-r border-slate-800/50 p-2 relative group transition-colors hover:bg-[#1a1c2a]"
+            [class.bg-[#0f1016]]="!date">
+            @if (date) {
+              <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full"
+                          [class.bg-blue-600]="date.toDateString() === currentDate().toDateString()"
+                          [class.text-white]="date.toDateString() === currentDate().toDateString()"
+                          [class.text-slate-400]="date.toDateString() !== currentDate().toDateString()">
+                        {{ date.getDate() }}
+                    </span>
+              </div>
+
+              <div
+                class="space-y-1.5 overflow-y-auto max-h-[100px] scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+                @for (event of getEventsForDay(date); track event.id) {
+                  <div
+                    class="flex items-center gap-2 px-1.5 py-1 rounded text-xs border-l-2 backdrop-blur-sm transition-all hover:scale-[1.02] cursor-default"
+                    [class.bg-blue-500/10]="event.type === 'sonarr'"
+                    [class.border-blue-500]="event.type === 'sonarr'"
+                    [class.text-blue-300]="event.type === 'sonarr'"
+                    [class.bg-amber-500/10]="event.type === 'radarr'"
+                    [class.border-amber-500]="event.type === 'radarr'"
+                    [class.text-amber-300]="event.type === 'radarr'">
+
+                    <!-- Poster Thumbnail (Optional) -->
+                    <!--
+                                    @if (event.posterPath) {
+                                        <img [src]="event.posterPath | tmdbImage:'w92'" class="w-4 h-6 object-cover rounded shadow-sm">
+                                    }
+                                    -->
+
+                  <div class="truncate">
+                    <span class="font-medium block truncate">{{ event.title }}</span>
+                    @if (event.seasonNumber) {
+                      <span class="opacity-75 text-[10px]">S{{ event.seasonNumber }}E{{
+                          event.episodeNumber
+                        }}</span>
+                    }
+                  </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

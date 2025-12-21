@@ -1,22 +1,23 @@
-import { Component, EventEmitter, inject, Input, Output, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { TraktService } from '../../integrations/trakt/trakt.service';
-import { TmdbService } from '../../integrations/tmdb/tmdb.service';
-import { RadarrService } from '../../integrations/radarr/radarr.service';
-import { SonarrService } from '../../integrations/sonarr/sonarr.service';
-import { ServicesService, ServiceType } from '../../services/services';
-import { AddMediaModalComponent } from '../add-media-modal/add-media-modal.component';
-import { TraktMovie, TraktShow } from '../../integrations/trakt/trakt.models';
-import { Observable } from 'rxjs';
+import {Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, signal, SimpleChanges} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {TmdbService} from '../../integrations/tmdb/tmdb.service';
+import {ServicesService, ServiceType} from '../../services/services';
+import {AddMediaModalComponent} from '../add-media-modal/add-media-modal.component';
+import {MetadataService, NormalizedDetails} from '../../services/metadata.service';
+import {LibraryService, LibraryStatus} from '../../services/library.service';
+import {MessageService} from '../../services/message.service';
+import {TmdbCollection, TmdbCredits, TmdbItem} from '../../integrations/tmdb/tmdb.models';
+
+import {TmdbImagePipe} from '../../pipes/tmdb-image.pipe';
 
 @Component({
   selector: 'app-details-modal',
   standalone: true,
-  imports: [CommonModule, AddMediaModalComponent],
+  imports: [CommonModule, AddMediaModalComponent, TmdbImagePipe],
   templateUrl: './details-modal.component.html',
   styles: ``
 })
-export class DetailsModalComponent {
+export class DetailsModalComponent implements OnInit, OnChanges {
   @Input() traktServiceId?: number;
   @Input() type: 'movie' | 'show' = 'movie';
   @Input() traktId?: number;
@@ -25,21 +26,31 @@ export class DetailsModalComponent {
 
   @Output() close = new EventEmitter<void>();
 
-  private traktService = inject(TraktService);
   private tmdbService = inject(TmdbService);
   private servicesService = inject(ServicesService);
-  private radarrService = inject(RadarrService);
-  private sonarrService = inject(SonarrService);
+  private metadataService = inject(MetadataService);
+  private libraryService = inject(LibraryService);
+  private messageService = inject(MessageService);
 
   isOpen = false;
   loading = signal(true);
 
-  details = signal<any>(null);
-  people = signal<any>(null);
+  details = signal<NormalizedDetails | null>(null);
+  people = signal<TmdbCredits | null>(null);
+  recommendations = signal<TmdbItem[]>([]);
+  similar = signal<TmdbItem[]>([]);
+
+  // Season / Episode Data
+  expandedSeason = signal<number | null>(null);
+  seasonEpisodes = signal<Record<number, any[]>>({});
+  loadingSeason = signal<number | null>(null);
 
   // Library Status
   inLibrary = signal(false);
   checkingLibrary = signal(false);
+  sonarrEpisodes = signal<Record<number, Set<number>>>({});
+  collectionInfo = signal<TmdbCollection | null>(null); // { name: string, tmdbId: number, images: ... }
+  expandedCollection = signal(false);
 
   // Add Modal
   showAddModal = false;
@@ -47,111 +58,75 @@ export class DetailsModalComponent {
   // TMDB Config
   private tmdbServiceId?: number;
 
+  ngOnInit() {
+    this.libraryService.ensureLibraryCache();
+    this.servicesService.getServices().subscribe(services => {
+      const tmdb = services.find(s => s.type === ServiceType.TMDB);
+      if (tmdb) this.tmdbServiceId = tmdb.id;
+    });
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['tmdbId'] || changes['traktId'] || changes['tvdbId']) {
+      // Only open if we have at least one ID and it's not a reset (undefined/null)
+      const hasId = this.tmdbId || this.traktId || this.tvdbId;
+      if (hasId) {
+        this.open();
+      }
+    }
+  }
+
   open() {
     this.isOpen = true;
     this.loading.set(true);
     this.details.set(null);
     this.people.set(null);
+    this.recommendations.set([]);
+    this.similar.set([]);
     this.inLibrary.set(false);
-
-    // Get Services to find TMDB and others
-    this.servicesService.getServices().subscribe(services => {
-      const tmdb = services.find(s => s.type === ServiceType.TMDB);
-      if (tmdb) this.tmdbServiceId = tmdb.id;
-      else this.tmdbServiceId = undefined;
-
-      const trakt = services.find(s => s.type === ServiceType.TRAKT);
-      if (trakt) this.traktServiceId = trakt.id;
-
-      this.resolveAndFetch();
-    });
+    this.sonarrEpisodes.set({});
+    this.collectionInfo.set(null);
+    this.resolveAndFetch();
   }
 
   private resolveAndFetch() {
-    if (this.tmdbServiceId) {
-      if (this.tmdbId) {
-        this.fetchDetails();
-        this.checkLibraryWithId(this.tmdbId);
-      } else if (this.tvdbId && this.type === 'show' && this.traktServiceId) {
-        this.traktService.search(this.traktServiceId, 'tvdb', this.tvdbId.toString(), 'show')
-          .subscribe((results: any[]) => {
-            if (results && results.length > 0 && results[0].show) {
-              this.tmdbId = results[0].show.ids.tmdb;
-              this.traktId = results[0].show.ids.trakt;
-              this.fetchDetails();
-              if (this.tmdbId) this.checkLibraryWithId(this.tmdbId);
-            } else {
-              console.warn('ID Resolution failed for TMDB');
-              this.loading.set(false);
-            }
-          }, () => this.loading.set(false));
-      } else if (this.traktId && this.traktServiceId) {
-        if (this.type === 'movie') {
-          this.traktService.getMovie(this.traktServiceId, this.traktId).subscribe((res: TraktMovie) => {
-            this.handleTraktResolution(res);
-          }, () => this.loading.set(false));
-        } else {
-          this.traktService.getShow(this.traktServiceId, this.traktId).subscribe((res: TraktShow) => {
-            this.handleTraktResolution(res);
-          }, () => this.loading.set(false));
+    console.log(`resolveAndFetch`);
+    const ids = {
+      tmdb: this.tmdbId,
+      trakt: this.traktId,
+      tvdb: this.tvdbId
+    };
+
+    this.metadataService.resolveAndFetch(ids, this.type).subscribe({
+      next: (details) => {
+        this.details.set(details);
+        this.loading.set(false);
+
+        // Update IDs based on resolved details
+        if (details.ids.tmdb) this.tmdbId = details.ids.tmdb;
+        if (details.ids.trakt) this.traktId = details.ids.trakt;
+        if (details.ids.tvdb) this.tvdbId = details.ids.tvdb;
+
+        if (details.collection?.id) {
+          this.fetchCollectionDetails(details.collection.id);
         }
-      } else {
-        console.error('Insufficient info for TMDB fetch');
+
+        if (this.tmdbId) {
+          console.log(`USING TMDB ID ${this.tmdbId} for library check`)
+          this.checkLibraryWithId(this.tmdbId);
+        }
+
+        // People fetching still mostly separate depending on source
+        if (this.tmdbServiceId && this.tmdbId) {
+          console.log(`USING TMDB ID ${this.tmdbId} for credits fetching`)
+          this.fetchTmdbCredits();
+        }
+      },
+      error: (err) => {
+        console.error('Failed to resolve/fetch details', err);
         this.loading.set(false);
       }
-    }
-    else if (this.traktServiceId && (this.traktId || this.tmdbId || this.tvdbId)) {
-      if (this.traktId) {
-        this.fetchDetailsTrakt();
-        if (this.tmdbId) this.checkLibraryWithId(this.tmdbId);
-      } else if (this.tmdbId && this.type === 'movie') {
-        this.traktService.search(this.traktServiceId, 'tmdb', this.tmdbId.toString(), 'movie').subscribe(res => {
-          if (res[0]?.movie) {
-            this.traktId = res[0].movie.ids.trakt;
-            this.fetchDetailsTrakt();
-            this.checkLibraryWithId(this.tmdbId!);
-          }
-        });
-      } else if (this.tvdbId && this.type === 'show') {
-        this.traktService.search(this.traktServiceId, 'tvdb', this.tvdbId.toString(), 'show').subscribe(res => {
-          if (res[0]?.show) {
-            this.traktId = res[0].show.ids.trakt;
-            this.tmdbId = res[0].show.ids.tmdb;
-            this.fetchDetailsTrakt();
-            if (this.tmdbId) this.checkLibraryWithId(this.tmdbId!);
-          }
-        });
-      } else if (this.tmdbId && this.type === 'show') {
-        this.traktService.search(this.traktServiceId, 'tmdb', this.tmdbId.toString(), 'show').subscribe(res => {
-          if (res[0]?.show) {
-            this.traktId = res[0].show.ids.trakt;
-            if (!this.tmdbId) this.tmdbId = res[0].show.ids.tmdb;
-
-            this.fetchDetailsTrakt();
-            if (this.tmdbId) this.checkLibraryWithId(this.tmdbId);
-          } else {
-            // Fallback: If Trakt search fails, we're stuck.
-            this.loading.set(false);
-          }
-        }, err => this.loading.set(false));
-      }
-    } else {
-      console.error('No Metadata Service Available (TMDB or Trakt)');
-      this.loading.set(false);
-    }
-  }
-
-  private handleTraktResolution(res: TraktMovie | TraktShow) {
-    this.tmdbId = res.ids.tmdb;
-    if (this.tmdbId) {
-      this.fetchDetails();
-      this.checkLibraryWithId(this.tmdbId);
-    } else {
-      console.warn('No TMDB ID found for this item via Trakt');
-      this.processTraktData(res);
-      this.fetchTraktPeople();
-      this.loading.set(false);
-    }
+    });
   }
 
   onClose() {
@@ -165,178 +140,156 @@ export class DetailsModalComponent {
     this.tvdbId = undefined;
   }
 
-  fetchDetails() {
-    if (this.tmdbServiceId && this.tmdbId) {
-      if (this.type === 'movie') {
-        this.tmdbService.getMovie(this.tmdbServiceId, this.tmdbId).subscribe(data => {
-          this.processTmdbData(data);
-          this.loading.set(false);
-        }, err => this.loading.set(false));
-      } else {
-        this.tmdbService.getTv(this.tmdbServiceId, this.tmdbId).subscribe(data => {
-          this.processTmdbData(data);
-          this.loading.set(false);
-        }, err => this.loading.set(false));
-      }
-    }
-  }
-
-  fetchDetailsTrakt() {
-    if (!this.traktServiceId || !this.traktId) return;
-
-    if (this.type === 'movie') {
-      this.traktService.getMovie(this.traktServiceId, this.traktId).subscribe((data: TraktMovie) => {
-        this.processTraktData(data);
-        if (data.ids.tmdb) {
-          this.tmdbId = data.ids.tmdb;
-          this.checkLibraryWithId(this.tmdbId);
-        }
-        this.loading.set(false);
-      });
-    } else {
-      this.traktService.getShow(this.traktServiceId, this.traktId).subscribe((data: TraktShow) => {
-        this.processTraktData(data);
-        if (data.ids.tmdb) {
-          this.tmdbId = data.ids.tmdb;
-          this.checkLibraryWithId(this.tmdbId);
-        }
-        this.loading.set(false);
-      });
-    }
-
-    this.fetchTraktPeople();
-  }
-
-  fetchTraktPeople() {
-    if (!this.traktServiceId || !this.traktId) return;
+  fetchTmdbCredits() {
+    if (!this.tmdbServiceId || !this.tmdbId) return;
     const obs = this.type === 'movie'
-      ? this.traktService.getMoviePeople(this.traktServiceId, this.traktId)
-      : this.traktService.getShowPeople(this.traktServiceId, this.traktId);
+      ? this.tmdbService.getMovieCredits(this.tmdbServiceId, this.tmdbId)
+      : this.tmdbService.getTvCredits(this.tmdbServiceId, this.tmdbId);
 
     obs.subscribe(data => {
       this.people.set(data);
     });
+
+    const recObs = this.type === 'movie'
+      ? this.tmdbService.getMovieRecommendations(this.tmdbServiceId, this.tmdbId)
+      : this.tmdbService.getTvRecommendations(this.tmdbServiceId, this.tmdbId);
+
+    recObs.subscribe(data => {
+      this.recommendations.set(data.results);
+    });
+
+    const simObs = this.type === 'movie'
+      ? this.tmdbService.getMovieSimilar(this.tmdbServiceId, this.tmdbId)
+      : this.tmdbService.getTvSimilar(this.tmdbServiceId, this.tmdbId);
+
+    simObs.subscribe(data => {
+      this.similar.set(data.results);
+    });
   }
 
-  processTmdbData(data: any) {
-    const normalized = {
-      title: data.title || data.name,
-      year: new Date(data.release_date || data.first_air_date).getFullYear(),
-      overview: data.overview,
-      runtime: data.runtime || (data.episode_run_time?.length ? data.episode_run_time[0] : 0),
-      rating: data.vote_average,
-      genres: data.genres?.map((g: any) => g.name) || [],
-      poster_path: data.poster_path,
-      backdrop_path: data.backdrop_path,
-      certification: null,
-      ids: { tmdb: data.id }
-    };
-    this.details.set(normalized);
+  fetchCollectionDetails(collectionId: number) {
+    if (!this.tmdbServiceId) return;
+    this.tmdbService.getCollection(this.tmdbServiceId, collectionId).subscribe(data => {
+      const tmdbData: any = {...data, tmdbId: data.id};
+      delete tmdbData.id;
 
-    if (data.credits) {
-      const mappedCast = data.credits.cast.slice(0, 20).map((c: any) => ({
-        person: {
-          name: c.name,
-          ids: { tmdb: c.id }
+      if (tmdbData.parts) {
+        tmdbData.parts = tmdbData.parts.map((p: any) => ({
+          ...p,
+          inLibrary: this.libraryService.isMovieInLibrary(p.id)
+        }));
+
+        // Count library items
+        tmdbData.libraryCount = tmdbData.parts.filter((p: any) => p.inLibrary).length;
+        tmdbData.monitored = tmdbData.libraryCount === tmdbData.parts.length;
+      }
+
+      this.collectionInfo.set(tmdbData);
+      this.expandedCollection.set(true);
+    });
+  }
+
+  toggleSeason(seasonNumber: number) {
+    if (this.expandedSeason() === seasonNumber) {
+      this.expandedSeason.set(null);
+      return;
+    }
+
+    this.expandedSeason.set(seasonNumber);
+
+    // Check if we already have episodes
+    const currentEpisodes = this.seasonEpisodes();
+    if (currentEpisodes[seasonNumber]) {
+      return;
+    }
+
+    // Fetch episodes
+    this.loadingSeason.set(seasonNumber);
+    // Use legacy fetch for season episodes for now, as MetadataService logic for seasons is partial
+    // Ideally MetadataService should handle this too.
+
+    if (this.tmdbServiceId && this.tmdbId) {
+      this.tmdbService.getSeason(this.tmdbServiceId!, this.tmdbId, seasonNumber).subscribe({
+        next: (data) => {
+          this.seasonEpisodes.update(current => ({
+            ...current,
+            [seasonNumber]: data.episodes || []
+          }));
+          this.loadingSeason.set(null);
         },
-        character: c.character,
-        profile_path: c.profile_path
-      }));
-      this.people.set({ cast: mappedCast });
+        error: () => {
+          this.loadingSeason.set(null);
+        }
+      });
     }
   }
 
-  processTraktData(data: any) {
-    this.details.set(data);
+  switchToItem(tmdbId: number, type?: 'movie' | 'show') {
+    this.tmdbId = tmdbId;
+    this.traktId = undefined;
+    this.tvdbId = undefined;
+    if (type) this.type = type;
+    this.open();
+    const scrollContainer = document.querySelector('.overflow-y-auto');
+    if (scrollContainer) scrollContainer.scrollTop = 0;
   }
 
   checkLibraryWithId(tmdbId: number) {
     this.checkingLibrary.set(true);
-    this.servicesService.getServices().subscribe(services => {
-      const targetType = this.type === 'movie' ? ServiceType.RADARR : ServiceType.SONARR;
-      const service = services.find(s => s.type === targetType);
-
-      if (!service) {
+    this.libraryService.checkLibrary(this.type, tmdbId, this.tvdbId).subscribe({
+      next: (status: LibraryStatus) => {
+        if (status.inLibrary) this.inLibrary.set(true);
+        if (status.collectionTmdbId) this.fetchCollectionDetails(status.collectionTmdbId);
+        if (status.images) {
+          this.details.update(d => d ? ({...d, images: status.images}) : null);
+        }
+        if (status.sonarrEpisodes) {
+          this.sonarrEpisodes.set(status.sonarrEpisodes);
+        }
         this.checkingLibrary.set(false);
-        return;
-      }
-
-      const term = `tmdb:${tmdbId}`;
-      if (this.type === 'movie') {
-        this.radarrService.lookup(service.id!, term).subscribe(results => {
-          const match = results.find(m => m.tmdbId === tmdbId);
-          if (match && match.id) this.inLibrary.set(true);
-          this.checkingLibrary.set(false);
-        });
-      } else {
-        this.sonarrService.lookup(service.id!, term).subscribe(results => {
-          const match = results.find(s => s.tmdbId === tmdbId);
-          if (match && match.id) this.inLibrary.set(true);
-          this.checkingLibrary.set(false);
-        });
+      },
+      error: (e) => {
+        console.error('Library check failed', e);
+        this.checkingLibrary.set(false);
       }
     });
   }
 
-  getPoster() {
-    const d = this.details();
-    if (!d) return '';
-
-    if (d.poster_path) return `https://image.tmdb.org/t/p/w500${d.poster_path}`;
-
-    const images = d.images;
-    if (images) {
-      const poster = images.poster;
-      let url = '';
-      if (Array.isArray(poster)) url = poster[0];
-      else if (poster && typeof poster === 'object') url = poster.medium || poster.full;
-      else if (typeof poster === 'string') url = poster;
-      return this.ensureProtocol(url);
-    }
-    return '';
+  isDownloaded(season: number, episode: number): boolean {
+    const map = this.sonarrEpisodes();
+    return map[season]?.has(episode) || false;
   }
 
-  getBackdrop() {
-    const d = this.details();
-    if (!d) return '';
-
-    if (d.backdrop_path) return `https://image.tmdb.org/t/p/original${d.backdrop_path}`;
-
-    const images = d.images;
-    if (images) {
-      const fanart = images.fanart;
-      let url = '';
-      if (Array.isArray(fanart)) url = fanart[0];
-      else if (fanart && typeof fanart === 'object') url = fanart.full || fanart.medium;
-      else if (typeof fanart === 'string') url = fanart;
-      return this.ensureProtocol(url);
-    }
-    return '';
+  getSeasonStatus(seasonNumber: number, totalEpisodes: number): 'full' | 'partial' | 'none' {
+    const downloadedCount = this.sonarrEpisodes()[seasonNumber]?.size || 0;
+    if (downloadedCount === 0) return 'none';
+    if (downloadedCount >= totalEpisodes) return 'full';
+    return 'partial';
   }
 
-  getHeadshot(person: any): string {
-    if (person.profile_path) return `https://image.tmdb.org/t/p/w185${person.profile_path}`;
 
-    const images = person.person?.images || person.images;
-    if (images) {
-      const headshot = images.headshot;
-      let url = '';
-      if (Array.isArray(headshot)) url = headshot[0];
-      else if (headshot && typeof headshot === 'object') url = headshot.thumb || headshot.medium || headshot.full;
-      else if (typeof headshot === 'string') return headshot;
-      return this.ensureProtocol(url);
-    }
-    return '';
+  showCollectionAddModal = false;
+
+  openCollectionAddModal() {
+    this.showCollectionAddModal = true;
   }
 
-  private ensureProtocol(url: string | undefined): string {
-    if (!url) return '';
-    if (url.startsWith('//')) {
-      return 'https:' + url;
-    }
-    if (!url.startsWith('http') && !url.startsWith('https')) {
-      return 'https://' + url;
-    }
-    return url;
+  performAddCollection(config: any) {
+    const col = this.collectionInfo();
+    if (!col) return;
+
+    this.showCollectionAddModal = false;
+
+    this.libraryService.addCollection(col, config).subscribe({
+      next: () => {
+        this.messageService.show('Collection movies added to Radarr queue', 'success');
+        this.collectionInfo.update(c => c ? {...c, monitored: true} : null);
+        this.fetchCollectionDetails(col.tmdbId!); // Refresh to show In Library status
+      },
+      error: (err) => {
+        console.error('Failed to save collection', err);
+        this.messageService.show('Failed to save collection. Check console.', 'error');
+      }
+    });
   }
 }

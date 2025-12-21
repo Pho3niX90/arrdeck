@@ -1,13 +1,13 @@
-import { Component, Input, OnInit, inject, signal, computed, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { TraktService } from '../trakt.service';
-import { TraktShow, TraktTrendingItem } from '../trakt.models';
-import { WidgetCardComponent } from '../../../components/widget-card/widget-card.component';
-import { DetailsModalComponent } from '../../../components/details-modal/details-modal.component';
-import { SonarrService } from '../../sonarr/sonarr.service';
-import { ServicesService } from '../../../services/services';
-import { MediaCarouselComponent } from '../../../shared/components/media-carousel/media-carousel.component';
-import { MediaItem } from '../../../shared/models/media-item.model';
+import {Component, computed, inject, Input, OnInit, signal, ViewChild} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {TraktService} from '../trakt.service';
+import {TraktShow, TraktTrendingItem} from '../trakt.models';
+import {WidgetCardComponent} from '../../../components/widget-card/widget-card.component';
+import {DetailsModalComponent} from '../../../components/details-modal/details-modal.component';
+import {SonarrService} from '../../sonarr/sonarr.service';
+import {ServicesService} from '../../../services/services';
+import {MediaCarouselComponent} from '../../../shared/components/media-carousel/media-carousel.component';
+import {MediaItem} from '../../../shared/models/media-item.model';
 
 @Component({
   selector: 'app-trakt-trending-shows',
@@ -17,7 +17,7 @@ import { MediaItem } from '../../../shared/models/media-item.model';
   styles: ``
 })
 export class TraktTrendingShowsComponent implements OnInit {
-  @Input({ required: true }) serviceId!: number;
+  @Input({required: true}) serviceId!: number;
 
   @ViewChild(DetailsModalComponent) detailsModal!: DetailsModalComponent;
 
@@ -68,7 +68,7 @@ export class TraktTrendingShowsComponent implements OnInit {
         this.sonarrService.getSeries(sonarr.id!).subscribe(shows => {
           const ids = new Set<number>();
           shows.forEach(s => {
-            if (s.tmdbId) ids.add(s.tmdbId);
+            if (s.tvdbId) ids.add(s.tvdbId);
           });
           this.libraryIds.set(ids);
         });
@@ -77,8 +77,8 @@ export class TraktTrendingShowsComponent implements OnInit {
   }
 
   isInLibrary(show: TraktShow): boolean {
-    const tmdb = show.ids.tmdb;
-    return this.libraryIds().has(tmdb);
+    const tvdb = show.ids.tvdb;
+    return !!tvdb && this.libraryIds().has(tvdb);
   }
 
   getPoster(show: TraktShow): string {

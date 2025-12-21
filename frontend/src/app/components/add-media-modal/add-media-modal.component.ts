@@ -5,94 +5,29 @@ import { ServicesService, ServiceType } from '../../services/services';
 import { RadarrService } from '../../integrations/radarr/radarr.service';
 import { SonarrService } from '../../integrations/sonarr/sonarr.service';
 import { FileSizePipe } from '../../pipes/file-size.pipe';
+import { MessageService } from '../../services/message.service';
 
 @Component({
   selector: 'app-add-media-modal',
   standalone: true,
   imports: [CommonModule, FormsModule, FileSizePipe],
-  template: `
-    @if (isOpen) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" (click)="close()"></div>
-
-        <div class="relative bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-6">
-          <h2 class="text-xl font-bold text-white">Add to Library</h2>
-
-          <div class="space-y-4">
-            <!-- Service Selection -->
-            <div class="space-y-2">
-              <label class="text-sm text-slate-400">Select Service</label>
-              <select [(ngModel)]="selectedServiceId" (change)="onServiceChange()"
-                      class="w-full bg-slate-800 border-slate-700 rounded-lg text-white px-3 py-2">
-                @for (s of availableServices(); track s.id) {
-                  <option [value]="s.id">{{ s.name }}</option>
-                }
-              </select>
-            </div>
-
-            <!-- Root Folder -->
-            <div class="space-y-2">
-              <label class="text-sm text-slate-400">Root Folder</label>
-              <select [(ngModel)]="selectedRootFolder"
-                      class="w-full bg-slate-800 border-slate-700 rounded-lg text-white px-3 py-2">
-                @for (folder of rootFolders(); track folder.path) {
-                  <option [value]="folder.path">{{ folder.path }}
-                    ({{ folder.freeSpace | fileSize }})
-                  </option>
-                }
-              </select>
-            </div>
-
-            <!-- Quality Profile -->
-            <div class="space-y-2">
-              <label class="text-sm text-slate-400">Quality Profile</label>
-              <select [(ngModel)]="selectedProfileId"
-                      class="w-full bg-slate-800 border-slate-700 rounded-lg text-white px-3 py-2">
-                @for (profile of profiles(); track profile.id) {
-                  <option [value]="profile.id">{{ profile.name }}</option>
-                }
-              </select>
-            </div>
-
-            <!-- Checkbox for Monitoring (default true) -->
-            <div class="flex items-center gap-2">
-              <input type="checkbox" id="monitored" [(ngModel)]="monitored"
-                     class="rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-blue-500">
-              <label for="monitored" class="text-sm text-white">Monitor</label>
-            </div>
-
-            <!-- Search on Add (default true) -->
-            <div class="flex items-center gap-2">
-              <input type="checkbox" id="searchNow" [(ngModel)]="searchNow"
-                     class="rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-blue-500">
-              <label for="searchNow" class="text-sm text-white">Search on Add</label>
-            </div>
-          </div>
-
-          <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
-            <button (click)="close()" class="px-4 py-2 text-slate-300 hover:text-white transition">Cancel</button>
-            <button (click)="add()" [disabled]="!canAdd()"
-                    class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed">
-              {{ isAdding() ? 'Adding...' : 'Add' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    }
-  `
+  templateUrl: './add-media-modal.component.html'
 })
 export class AddMediaModalComponent implements OnInit {
   @Input() type: 'movie' | 'show' = 'movie';
   @Input() tmdbId!: number;
   @Input() title!: string;
   @Input() year!: number;
+  @Input() mode: 'add' | 'configure' = 'add';
 
   @Output() added = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
+  @Output() configure = new EventEmitter<any>();
 
   private servicesService = inject(ServicesService);
   private radarrService = inject(RadarrService);
   private sonarrService = inject(SonarrService);
+  private messageService = inject(MessageService);
 
   isOpen = false;
   isAdding = signal(false);
@@ -129,7 +64,9 @@ export class AddMediaModalComponent implements OnInit {
       this.availableServices.set(filtered);
 
       if (filtered.length > 0) {
-        this.selectedServiceId.set(filtered[0].id!);
+        const savedServiceId = localStorage.getItem(`arrdeck_last_service_${this.type}`);
+        const found = filtered.find(s => s.id === Number(savedServiceId));
+        this.selectedServiceId.set(found ? found.id! : filtered[0].id!);
         this.onServiceChange();
       }
     });
@@ -142,20 +79,28 @@ export class AddMediaModalComponent implements OnInit {
     if (this.type === 'movie') {
       this.radarrService.getProfiles(id).subscribe(p => {
         this.profiles.set(p);
-        if (p.length) this.selectedProfileId = p[0].id;
+        const savedProfile = localStorage.getItem(`arrdeck_last_profile_${this.type}`);
+        const found = p.find((fp: any) => fp.id === Number(savedProfile));
+        if (p.length) this.selectedProfileId = found ? found.id : p[0].id;
       });
       this.radarrService.getRootFolders(id).subscribe(f => {
         this.rootFolders.set(f);
-        if (f.length) this.selectedRootFolder = f[0].path;
+        const savedRoot = localStorage.getItem(`arrdeck_last_root_${this.type}`);
+        const found = f.find((fp: any) => fp.path === savedRoot);
+        if (f.length) this.selectedRootFolder = found ? found.path : f[0].path;
       });
     } else {
       this.sonarrService.getProfiles(id).subscribe(p => {
         this.profiles.set(p);
-        if (p.length) this.selectedProfileId = p[0].id;
+        const savedProfile = localStorage.getItem(`arrdeck_last_profile_${this.type}`);
+        const found = p.find((fp: any) => fp.id === Number(savedProfile));
+        if (p.length) this.selectedProfileId = found ? found.id : p[0].id;
       });
       this.sonarrService.getRootFolders(id).subscribe(f => {
         this.rootFolders.set(f);
-        if (f.length) this.selectedRootFolder = f[0].path;
+        const savedRoot = localStorage.getItem(`arrdeck_last_root_${this.type}`);
+        const found = f.find((fp: any) => fp.path === savedRoot);
+        if (f.length) this.selectedRootFolder = found ? found.path : f[0].path;
       });
     }
   }
@@ -164,12 +109,31 @@ export class AddMediaModalComponent implements OnInit {
     return !!this.selectedServiceId() && !!this.selectedProfileId && !!this.selectedRootFolder && !this.isAdding();
   }
 
+  saveSettings() {
+    if (this.selectedServiceId()) localStorage.setItem(`arrdeck_last_service_${this.type}`, this.selectedServiceId()!.toString());
+    if (this.selectedProfileId) localStorage.setItem(`arrdeck_last_profile_${this.type}`, this.selectedProfileId.toString());
+    if (this.selectedRootFolder) localStorage.setItem(`arrdeck_last_root_${this.type}`, this.selectedRootFolder);
+  }
+
   add() {
     if (!this.canAdd()) return;
     this.isAdding.set(true);
 
     const serviceId = this.selectedServiceId()!;
     const term = `tmdb:${this.tmdbId}`;
+
+    if (this.mode === 'configure') {
+      this.configure.emit({
+        serviceId,
+        qualityProfileId: this.selectedProfileId,
+        rootFolderPath: this.selectedRootFolder,
+        monitored: this.monitored,
+        searchNow: this.searchNow
+      });
+      this.saveSettings();
+      this.finish();
+      return;
+    }
 
     if (this.type === 'movie') {
       this.radarrService.lookup(serviceId, term).subscribe({
@@ -184,23 +148,26 @@ export class AddMediaModalComponent implements OnInit {
               addOptions: { searchForMovie: this.searchNow }
             };
             this.radarrService.addMovie(serviceId, payload).subscribe({
-              next: () => this.finish(),
+              next: () => {
+                this.saveSettings();
+                this.finish();
+              },
               error: (err) => {
                 console.error('Error adding movie to Radarr:', err);
-                alert(`Failed to add movie: ${err.message || 'Unknown error'}`);
+                this.messageService.show(`Failed to add movie: ${err.message || 'Unknown error'}`, 'error');
                 this.isAdding.set(false);
               }
             });
           } else {
             console.warn('Radarr lookup returned no match for TMDB:', this.tmdbId, results);
             this.isAdding.set(false);
-            alert('Could not find movie in Radarr lookup. Check logs.');
+            this.messageService.show('Could not find movie in Radarr lookup. Check logs.', 'error');
           }
         },
         error: (err) => {
           console.error('Error searching Radarr:', err);
           this.isAdding.set(false);
-          alert(`Error searching Radarr: ${err.message}`);
+          this.messageService.show(`Error searching Radarr: ${err.message}`, 'error');
         }
       })
     } else {
@@ -217,10 +184,13 @@ export class AddMediaModalComponent implements OnInit {
               seasonFolder: true
             };
             this.sonarrService.addSeries(serviceId, payload).subscribe({
-              next: () => this.finish(),
+              next: () => {
+                this.saveSettings();
+                this.finish();
+              },
               error: (err) => {
                 console.error('Error adding series to Sonarr:', err);
-                alert(`Failed to add series: ${err.message || 'Unknown error'}`);
+                this.messageService.show(`Failed to add series: ${err.message || 'Unknown error'}`, 'error');
                 this.isAdding.set(false);
               }
             });
@@ -228,16 +198,16 @@ export class AddMediaModalComponent implements OnInit {
             console.warn('Sonarr lookup returned no match for TMDB:', this.tmdbId, results);
             this.isAdding.set(false);
             if (results.length > 0) {
-              alert(`Found ${results.length} results but TMDB ID didn't match. First: ${results[0].title} (${results[0].tmdbId})`);
+              this.messageService.show(`Found ${results.length} results but TMDB ID didn't match. First: ${results[0].title} (${results[0].tmdbId})`, 'error');
             } else {
-              alert('Could not find series in Sonarr lookup.');
+              this.messageService.show('Could not find series in Sonarr lookup.', 'error');
             }
           }
         },
         error: (err) => {
           console.error('Error searching Sonarr:', err);
           this.isAdding.set(false);
-          alert(`Error searching Sonarr: ${err.message}`);
+          this.messageService.show(`Error searching Sonarr: ${err.message}`, 'error');
         }
       });
     }

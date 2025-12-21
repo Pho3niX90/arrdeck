@@ -30,11 +30,7 @@ export class RadarrDataService {
         return this.moviesCache.get(serviceId) || [];
     }
 
-    getRecommendations(serviceId: number) {
-        if (this.recommendationsCache.has(serviceId)) {
-        }
-        return this.radarrService.getRecommendations(serviceId).pipe(
-            tap(recs => this.recommendationsCache.set(serviceId, recs))
-        );
+    getQueue(serviceId: number) {
+        return this.radarrService.getQueue(serviceId);
     }
 }

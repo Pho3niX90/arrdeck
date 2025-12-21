@@ -1,19 +1,20 @@
-import { Component, Input, OnInit, inject, signal } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { SonarrService } from '../sonarr.service';
-import { SonarrDataService } from '../sonarr.data.service';
-import { SonarrEpisode, SonarrSeries } from '../sonarr.models';
-import { WidgetCardComponent } from '../../../components/widget-card/widget-card.component';
+import {Component, inject, Input, OnInit, signal} from '@angular/core';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {SonarrService} from '../sonarr.service';
+import {SonarrDataService} from '../sonarr.data.service';
+import {SonarrEpisode, SonarrSeries} from '../sonarr.models';
+import {WidgetCardComponent} from '../../../components/widget-card/widget-card.component';
+import {TmdbImagePipe} from '../../../pipes/tmdb-image.pipe';
 
 @Component({
   selector: 'app-sonarr-calendar',
   standalone: true,
-  imports: [CommonModule, WidgetCardComponent, NgOptimizedImage],
+  imports: [CommonModule, WidgetCardComponent, NgOptimizedImage, TmdbImagePipe],
   templateUrl: './sonarr-calendar.component.html',
   styles: ``
 })
 export class SonarrCalendarComponent implements OnInit {
-  @Input({ required: true }) serviceId!: number;
+  @Input({required: true}) serviceId!: number;
 
   private sonarrService = inject(SonarrService);
   private dataService = inject(SonarrDataService);
@@ -51,7 +52,6 @@ export class SonarrCalendarComponent implements OnInit {
 
   getFanart(series: SonarrSeries | undefined): string {
     if (!series) return '';
-    const fanart = series.images.find(i => i.coverType === 'fanart');
-    return fanart ? fanart.remoteUrl : '';
+    return series.images.find(i => i.coverType === 'fanart')?.remoteUrl || '';
   }
 }

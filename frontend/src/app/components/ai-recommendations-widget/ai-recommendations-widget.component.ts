@@ -2,6 +2,7 @@ import { Component, computed, inject, signal, input, ViewChild, OnInit } from '@
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { DetailsModalComponent } from '../details-modal/details-modal.component';
 import { AiRecommendationsService, RecommendationResponse } from '../../services/ai-recommendations.service';
+import { MessageService } from '../../services/message.service';
 import { WidgetCardComponent } from '../widget-card/widget-card.component';
 import { FormsModule } from '@angular/forms';
 import { MediaCarouselComponent } from '../../shared/components/media-carousel/media-carousel.component';
@@ -23,10 +24,13 @@ interface EnrichedRecommendation {
     tvdbId?: number;
 }
 
+import { TmdbImagePipe } from '../../pipes/tmdb-image.pipe';
+
 @Component({
     selector: 'app-ai-recommendations-widget',
     standalone: true,
     imports: [CommonModule, WidgetCardComponent, FormsModule, DetailsModalComponent, MediaCarouselComponent],
+    providers: [TmdbImagePipe],
     templateUrl: './ai-recommendations-widget.component.html',
     styleUrls: ['./ai-recommendations-widget.component.css']
 })
@@ -43,6 +47,8 @@ export class AiRecommendationsWidgetComponent implements OnInit {
     private aiService = inject(AiRecommendationsService);
     private sonarrService = inject(SonarrService);
     private radarrService = inject(RadarrService);
+    private tmdbImagePipe = inject(TmdbImagePipe);
+    private messageService = inject(MessageService);
 
     recommendations = signal<EnrichedRecommendation[]>([]);
 
@@ -51,7 +57,7 @@ export class AiRecommendationsWidgetComponent implements OnInit {
             id: item.tmdbId || item.title,
             title: item.title,
             subtitle: item.year?.toString(),
-            imageUrl: item.remotePoster || '',
+            imageUrl: this.tmdbImagePipe.transform(item.remotePoster, 'w185'),
             clickAction: () => this.openDetails(item),
             accentColor: 'text-purple-400',
 
@@ -112,7 +118,7 @@ export class AiRecommendationsWidgetComponent implements OnInit {
                         title: match?.title || item.title,
                         year: match?.year || item.year,
                         remotePoster: match?.remotePoster || match?.images?.find((img: any) => img.coverType === 'poster')?.url,
-                        added: (match?.id && match.id > 0) ? true : false,
+                        added: !!(match?.id && match.id > 0),
                         monitored: match?.monitored,
                         tmdbId: match?.tmdbId || item.tmdbId
                     };
@@ -135,7 +141,7 @@ export class AiRecommendationsWidgetComponent implements OnInit {
 
     add(item: any) {
         if (!confirm(`Add ${item.title} to library?`)) return;
-        alert('Quick Add requires configuring defaults. For now, please search in the main app to add with options.');
+        this.messageService.show('Quick Add requires configuring defaults. For now, please search in the main app to add with options.', 'info');
     }
 
     openDetails(item: any) {

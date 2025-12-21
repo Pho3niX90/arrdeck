@@ -1,0 +1,339 @@
+<div class="max-w-4xl mx-auto space-y-8 pb-12">
+  <div class="flex items-center space-x-3 mb-6">
+    <div class="w-10 h-10 rounded-lg bg-blue-600/20 flex items-center justify-center text-blue-400">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+           stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+    </div>
+    <div>
+      <h1 class="text-2xl font-bold text-white">ArrDeck Settings</h1>
+      <p class="text-slate-400 text-sm">Configure your integrations and AI preferences</p>
+    </div>
+  </div>
+
+  <form [formGroup]="settingsForm" (ngSubmit)="onSubmit()">
+
+    <!-- Integrations Section -->
+    <section class="space-y-4 mb-8">
+      <h2 class="text-lg font-medium text-slate-200 ml-1">Integrations</h2>
+
+      <!-- Sonarr -->
+      <div class="bg-[#1e2030] border border-slate-700/50 rounded-xl p-6" formGroupName="sonarr">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-8 h-8 rounded bg-transparent flex items-center justify-center">
+            <img src="images/sonarr.png" alt="Sonarr" class="w-8 h-8 object-contain">
+          </div>
+          <span class="text-white font-semibold">Sonarr</span>
+          <span class="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">TV Shows</span>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">URL</label>
+            <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-slate-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                                </svg>
+                            </span>
+              <input type="text" formControlName="url"
+                     class="w-full bg-[#151621] border border-slate-700 rounded-lg text-white pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-slate-600"
+                     placeholder="http://localhost:8989">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">API Key</label>
+            <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-slate-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11.536 19.464a2.5 2.5 0 01-1.768.732H7.536a2.5 2.5 0 01-1.768-.732l-1.414-1.414a2.5 2.5 0 01-.732-1.768V14.5a2.5 2.5 0 01.732-1.768l.964-.964A6 6 0 1017 9z"/>
+                                </svg>
+                            </span>
+              <input type="password" formControlName="apiKey"
+                     class="w-full bg-[#151621] border border-slate-700 rounded-lg text-white pl-10 pr-10 py-2 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-slate-600"
+                     placeholder="••••••••••••••••••••••••••••••••">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Radarr -->
+      <div class="bg-[#1e2030] border border-slate-700/50 rounded-xl p-6" formGroupName="radarr">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-8 h-8 rounded bg-transparent flex items-center justify-center">
+            <img src="images/radarr.png" alt="Radarr" class="w-8 h-8 object-contain">
+          </div>
+          <span class="text-white font-semibold">Radarr</span>
+          <span class="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Movies</span>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">URL</label>
+            <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-slate-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                                </svg>
+                            </span>
+              <input type="text" formControlName="url"
+                     class="w-full bg-[#151621] border border-slate-700 rounded-lg text-white pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-slate-600"
+                     placeholder="http://localhost:7878">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">API Key</label>
+            <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-slate-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11.536 19.464a2.5 2.5 0 01-1.768.732H7.536a2.5 2.5 0 01-1.768-.732l-1.414-1.414a2.5 2.5 0 01-.732-1.768V14.5a2.5 2.5 0 01.732-1.768l.964-.964A6 6 0 1017 9z"/>
+                                </svg>
+                            </span>
+              <input type="password" formControlName="apiKey"
+                     class="w-full bg-[#151621] border border-slate-700 rounded-lg text-white pl-10 pr-10 py-2 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-slate-600"
+                     placeholder="••••••••••••••••••••••••••••••••">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TMDB -->
+      <div class="bg-[#1e2030] border border-slate-700/50 rounded-xl p-6" formGroupName="tmdb">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-8 h-8 rounded bg-transparent flex items-center justify-center">
+            <img src="images/tmdb.svg" alt="TMDB" class="w-8 h-8 object-contain">
+          </div>
+          <span class="text-white font-semibold">The Movie Database (TMDB)</span>
+          <span class="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Metadata</span>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">API Read Access Token
+              (v4)</label>
+            <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-slate-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11.536 19.464a2.5 2.5 0 01-1.768.732H7.536a2.5 2.5 0 01-1.768-.732l-1.414-1.414a2.5 2.5 0 01-.732-1.768V14.5a2.5 2.5 0 01.732-1.768l.964-.964A6 6 0 1017 9z"/>
+                                </svg>
+                            </span>
+              <input type="password" formControlName="apiKey"
+                     class="w-full bg-[#151621] border border-slate-700 rounded-lg text-white pl-10 pr-10 py-2 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-slate-600"
+                     placeholder="eyJhbGciOiJIUzI1NiJ9...">
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1">Found in TMDB Settings > API > API Read Access Token
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Artificial Intelligence -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-medium text-slate-200 ml-1">Artificial Intelligence</h2>
+      <div class="bg-[#1e2030] border border-slate-700/50 rounded-xl p-6" formGroupName="ai">
+
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded bg-transparent flex items-center justify-center">
+              @if (aiProvider() === 'gemini') {
+                <img src="images/gemini.png" alt="Gemini" class="w-8 h-8 object-contain">
+              }
+              @if (aiProvider() === 'ollama') {
+                <img src="images/ollama.png" alt="Ollama"
+                     class="w-8 h-8 rounded-full object-contain bg-white">
+              }
+            </div>
+            <div>
+              <span class="text-white font-semibold block">AI Recommendations</span>
+              <span class="text-xs text-slate-400">Generate personalized suggestions</span>
+            </div>
+          </div>
+
+          <div class="flex bg-[#151621] p-1 rounded-lg border border-slate-800">
+            <button type="button" (click)="setAiProvider('gemini')"
+                    [class.bg-blue-600]="aiProvider() === 'gemini'"
+                    [class.text-white]="aiProvider() === 'gemini'"
+                    [class.text-slate-400]="aiProvider() !== 'gemini'"
+                    class="px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-2">
+              <img src="images/gemini.png" class="w-4 h-4 object-contain">
+              Gemini
+            </button>
+            <button type="button" (click)="setAiProvider('ollama')"
+                    [class.bg-blue-600]="aiProvider() === 'ollama'"
+                    [class.text-white]="aiProvider() === 'ollama'"
+                    [class.text-slate-400]="aiProvider() !== 'ollama'"
+                    class="px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-2">
+              <img src="images/ollama.png" class="w-4 h-4 object-contain rounded-full bg-white">
+              Ollama
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Gemini Fields -->
+          @if (aiProvider() === 'gemini') {
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Gemini API Key</label>
+              <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-slate-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11.536 19.464a2.5 2.5 0 01-1.768.732H7.536a2.5 2.5 0 01-1.768-.732l-1.414-1.414a2.5 2.5 0 01-.732-1.768V14.5a2.5 2.5 0 01.732-1.768l.964-.964A6 6 0 1017 9z"/>
+                                </svg>
+                            </span>
+                <input type="password" formControlName="apiKey"
+                       class="w-full bg-[#151621] border border-slate-700 rounded-lg text-white pl-10 pr-10 py-2 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-slate-600"
+                       placeholder="••••••••••••••••••••••••••••••••">
+              </div>
+            </div>
+          }
+
+          <!-- Ollama Fields -->
+          @if (aiProvider() === 'ollama') {
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Ollama URL</label>
+              <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-slate-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                                </svg>
+                            </span>
+                <input type="text" formControlName="url"
+                       class="w-full bg-[#151621] border border-slate-700 rounded-lg text-white pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-slate-600"
+                       placeholder="http://localhost:11434">
+              </div>
+            </div>
+          }
+
+          <!-- Model Selection -->
+          <div>
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="block text-xs font-medium text-slate-400">Model</label>
+              @if (aiProvider() === 'gemini') {
+                <button type="button" (click)="fetchModels()"
+                        [disabled]="isLoadingModels || !getAiControl('apiKey').value"
+                        class="text-[10px] text-blue-400 hover:text-blue-300 disabled:opacity-50 transition-colors uppercase tracking-wider font-semibold">
+                  {{ isLoadingModels ? 'Loading...' : 'Refresh' }}
+                </button>
+              }
+            </div>
+
+            @if (aiProvider() === 'gemini') {
+              <div class="relative">
+                <!-- Custom arrow -->
+                <span class="absolute right-3 top-3 text-slate-500 pointer-events-none">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </span>
+                <select formControlName="model"
+                        class="w-full bg-[#151621] border border-slate-700 rounded-lg text-white px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 appearance-none transition-all">
+                  @for (m of geminiModels; track m) {
+                    <option [value]="m">{{ m }}</option>
+                  }
+                </select>
+              </div>
+            } @else {
+              <input type="text" formControlName="model"
+                     class="w-full bg-[#151621] border border-slate-700 rounded-lg text-white px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-slate-600"
+                     placeholder="e.g. llama3">
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- User Management -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-medium text-slate-200 ml-1">User Management</h2>
+      <div class="bg-[#1e2030] border border-slate-700/50 rounded-xl p-6">
+        <div class="space-y-4">
+          @for (user of users(); track user.id) {
+            <div class="flex items-center justify-between p-3 bg-[#151621] rounded-lg border border-slate-700">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-8 h-8 rounded-full bg-blue-600/20 flex items-center justify-center text-blue-400 font-bold">
+                  {{ user.username.charAt(0).toUpperCase() }}
+                </div>
+                <span class="text-white font-medium">{{ user.username }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" (click)="changePassword(user)"
+                        class="text-xs text-blue-400 hover:text-blue-300">Change Password
+                </button>
+                @if (user.username !== 'admin') {
+                  <button type="button" (click)="deleteUser(user)"
+                          class="text-xs text-red-400 hover:text-red-300">Delete
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Add User -->
+          <div class="pt-4 border-t border-slate-700/30">
+            @if (!showAddUser) {
+              <button type="button" (click)="showAddUser = true"
+                      class="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                     fill="currentColor">
+                  <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                        clip-rule="evenodd"/>
+                </svg>
+                Add User
+              </button>
+            }
+
+            @if (showAddUser) {
+              <div class="flex gap-2 items-center">
+                <input #newUsername type="text" placeholder="Username"
+                       class="bg-[#151621] border border-slate-700 rounded px-3 py-1.5 text-sm text-white">
+                <input #newPassword type="password" placeholder="Password"
+                       class="bg-[#151621] border border-slate-700 rounded px-3 py-1.5 text-sm text-white">
+                <button type="button"
+                        (click)="addUser(newUsername.value, newPassword.value); newUsername.value=''; newPassword.value=''"
+                        class="bg-blue-600 text-white px-3 py-1.5 rounded text-sm">Add
+                </button>
+                <button type="button" (click)="showAddUser = false"
+                        class="text-slate-400 px-3 py-1.5 text-sm">Cancel
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Save Button -->
+    <div class="mt-8 flex justify-end">
+      <button type="submit" [disabled]="isSubmitting || settingsForm.invalid"
+              class="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 px-12 rounded-xl shadow-lg shadow-blue-600/20 transform transition active:scale-95 disabled:opacity-50 disabled:transform-none">
+        {{ isSubmitting ? 'Saving Configuration...' : 'Save Settings' }}
+      </button>
+    </div>
+
+  </form>
+
+  <app-confirmation-modal (confirmed)="confirmDeleteUser()"></app-confirmation-modal>
+  <app-input-modal (confirmed)="confirmChangePassword($event)"></app-input-modal>
+</div>

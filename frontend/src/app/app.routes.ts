@@ -1,25 +1,39 @@
-import { Routes } from '@angular/router';
-import { Login } from './pages/login/login';
-import { Layout } from './components/layout/layout';
-import { Dashboard } from './pages/dashboard/dashboard';
-import { Settings } from './pages/settings/settings';
-import { Services } from './pages/services/services';
-import { authGuard } from './auth.guard';
+import {Routes} from '@angular/router';
+import {Login} from './pages/login/login';
+import {Layout} from './components/layout/layout';
+import {authGuard} from './auth.guard';
 
 export const routes: Routes = [
-    {
-        path: 'login',
-        component: Login
-    },
-    {
+  {
+    path: 'login',
+    component: Login
+  },
+  {
+    path: '',
+    component: Layout,
+    canActivate: [authGuard],
+    children: [
+      {
         path: '',
-        component: Layout,
-        canActivate: [authGuard],
-        children: [
-            { path: '', component: Dashboard },
-            { path: 'services', component: Services },
-            { path: 'settings', component: Settings }
-        ]
-    },
-    { path: '**', redirectTo: '' }
+        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
+      },
+      {
+        path: 'services',
+        loadComponent: () => import('./pages/services/services').then(m => m.Services)
+      },
+      {
+        path: 'calendar',
+        loadComponent: () => import('./pages/calendar/calendar').then(m => m.Calendar)
+      },
+      {
+        path: 'stats',
+        loadComponent: () => import('./pages/stats/stats').then(m => m.StatsPageComponent)
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./pages/settings/settings').then(m => m.Settings)
+      }
+    ]
+  },
+  {path: '**', redirectTo: ''}
 ];

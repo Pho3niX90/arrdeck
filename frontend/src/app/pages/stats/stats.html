@@ -1,0 +1,139 @@
+<div class="p-6 md:p-10 space-y-10 animate-fade-in text-white/90">
+
+  <div class="flex items-center justify-between">
+    <h1 class="text-3xl font-bold font-outfit tracking-tight">Library Statistics</h1>
+  </div>
+
+  @if (overview(); as data) {
+
+    <!-- TV Shows Section -->
+    @if (data.sonarr.length > 0) {
+      <section class="space-y-6">
+        <h2 class="text-xl font-medium text-white/80 border-b border-white/10 pb-2">TV Shows (Sonarr)</h2>
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          @for (service of data.sonarr; track service.name) {
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+              <div class="flex justify-between items-start mb-6">
+                <div>
+                  <h3 class="text-xl font-bold text-sky-400">{{ service.name }}</h3>
+                  <p class="text-sm text-white/50">Service ID: {{ service.serviceId }}</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-2xl font-bold">{{ service.seriesCount }}</div>
+                  <div class="text-xs text-white/50 uppercase tracking-widest">Series</div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-black/20 rounded-lg p-3">
+                  <div class="text-lg font-bold text-white">{{ service.episodeCount }}</div>
+                  <div class="text-xs text-white/50">Total Episodes</div>
+                </div>
+              </div>
+
+              <!-- Disk Space -->
+              <div class="space-y-4 mb-8">
+                <h4 class="text-xs font-bold text-white/50 uppercase tracking-widest">Storage</h4>
+                @for (disk of service.diskSpace; track disk.path) {
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span>{{ disk.path }} ({{ disk.label || 'Root' }})</span>
+                      <span class="text-white/70">{{ formatBytes(disk.freeSpace) }} free of {{
+                          formatBytes(disk.totalSpace)
+                        }}</span>
+                    </div>
+                    <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div class="h-full bg-emerald-500 rounded-full"
+                           [style.width.%]="getPercentage(disk.totalSpace - disk.freeSpace, disk.totalSpace)">
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Quality Profiles -->
+              <div class="space-y-3">
+                <h4 class="text-xs font-bold text-white/50 uppercase tracking-widest">Quality Profiles</h4>
+                @for (profile of service.profiles; track profile.name) {
+                  <div class="flex items-center gap-3 text-sm">
+                    <span class="w-32 truncate text-white/70" title="{{profile.name}}">{{ profile.name }}</span>
+                    <div class="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div class="h-full bg-indigo-500 rounded-full"
+                           [style.width.%]="getPercentage(profile.count, service.seriesCount || 1)"></div>
+                    </div>
+                    <span class="w-12 text-right text-white/50">{{ profile.count }}</span>
+                  </div>
+                }
+              </div>
+
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Movies Section -->
+    @if (data.radarr.length > 0) {
+      <section class="space-y-6">
+        <h2 class="text-xl font-medium text-white/80 border-b border-white/10 pb-2">Movies (Radarr)</h2>
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          @for (service of data.radarr; track service.name) {
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+              <div class="flex justify-between items-start mb-6">
+                <div>
+                  <h3 class="text-xl font-bold text-amber-400">{{ service.name }}</h3>
+                  <p class="text-sm text-white/50">Service ID: {{ service.serviceId }}</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-2xl font-bold">{{ service.movieCount }}</div>
+                  <div class="text-xs text-white/50 uppercase tracking-widest">Movies</div>
+                </div>
+              </div>
+
+              <!-- Disk Space -->
+              <div class="space-y-4 mb-8">
+                <h4 class="text-xs font-bold text-white/50 uppercase tracking-widest">Storage</h4>
+                @for (disk of service.diskSpace; track disk.path) {
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span>{{ disk.path }} ({{ disk.label || 'Root' }})</span>
+                      <span class="text-white/70">{{ formatBytes(disk.freeSpace) }} free of {{
+                          formatBytes(disk.totalSpace)
+                        }}</span>
+                    </div>
+                    <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div class="h-full bg-emerald-500 rounded-full"
+                           [style.width.%]="getPercentage(disk.totalSpace - disk.freeSpace, disk.totalSpace)">
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Quality Profiles -->
+              <div class="space-y-3">
+                <h4 class="text-xs font-bold text-white/50 uppercase tracking-widest">Quality Profiles</h4>
+                @for (profile of service.profiles; track profile.name) {
+                  <div class="flex items-center gap-3 text-sm">
+                    <span class="w-32 truncate text-white/70" title="{{profile.name}}">{{ profile.name }}</span>
+                    <div class="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div class="h-full bg-indigo-500 rounded-full"
+                           [style.width.%]="getPercentage(profile.count, service.movieCount || 1)"></div>
+                    </div>
+                    <span class="w-12 text-right text-white/50">{{ profile.count }}</span>
+                  </div>
+                }
+              </div>
+
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+  } @else {
+    <div class="flex items-center justify-center py-20">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+    </div>
+  }
+</div>

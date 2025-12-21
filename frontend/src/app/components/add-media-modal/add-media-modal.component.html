@@ -1,0 +1,68 @@
+@if (isOpen) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" (click)="close()"></div>
+
+    <div class="relative bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-6">
+      <h2 class="text-xl font-bold text-white">Add to Library</h2>
+
+      <div class="space-y-4">
+        <!-- Service Selection -->
+        <div class="space-y-2">
+          <label class="text-sm text-slate-400">Select Service</label>
+          <select [(ngModel)]="selectedServiceId" (change)="onServiceChange()"
+                  class="w-full bg-slate-800 border-slate-700 rounded-lg text-white px-3 py-2">
+            @for (s of availableServices(); track s.id) {
+              <option [value]="s.id">{{ s.name }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Root Folder -->
+        <div class="space-y-2">
+          <label class="text-sm text-slate-400">Root Folder</label>
+          <select [(ngModel)]="selectedRootFolder"
+                  class="w-full bg-slate-800 border-slate-700 rounded-lg text-white px-3 py-2">
+            @for (folder of rootFolders(); track folder.path) {
+              <option [value]="folder.path">{{ folder.path }}
+                ({{ folder.freeSpace | fileSize }})
+              </option>
+            }
+          </select>
+        </div>
+
+        <!-- Quality Profile -->
+        <div class="space-y-2">
+          <label class="text-sm text-slate-400">Quality Profile</label>
+          <select [(ngModel)]="selectedProfileId"
+                  class="w-full bg-slate-800 border-slate-700 rounded-lg text-white px-3 py-2">
+            @for (profile of profiles(); track profile.id) {
+              <option [value]="profile.id">{{ profile.name }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Checkbox for Monitoring (default true) -->
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="monitored" [(ngModel)]="monitored"
+                 class="rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-blue-500">
+          <label for="monitored" class="text-sm text-white">Monitor</label>
+        </div>
+
+        <!-- Search on Add (default true) -->
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="searchNow" [(ngModel)]="searchNow"
+                 class="rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-blue-500">
+          <label for="searchNow" class="text-sm text-white">Search on Add</label>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
+        <button (click)="close()" class="px-4 py-2 text-slate-300 hover:text-white transition">Cancel</button>
+        <button (click)="add()" [disabled]="!canAdd()"
+                class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ isAdding() ? 'Adding...' : 'Add' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

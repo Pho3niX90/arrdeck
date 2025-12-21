@@ -8,11 +8,13 @@ import { MediaItem } from '../../../shared/models/media-item.model';
 import { TimeAgoPipe } from '../../../pipes/time-ago.pipe';
 import { DetailsModalComponent } from '../../../components/details-modal/details-modal.component';
 
+import { TmdbImagePipe } from '../../../pipes/tmdb-image.pipe';
+
 @Component({
     selector: 'app-radarr-recent',
     standalone: true,
     imports: [CommonModule, WidgetCardComponent, MediaCarouselComponent, DetailsModalComponent],
-    providers: [TimeAgoPipe],
+    providers: [TimeAgoPipe, TmdbImagePipe],
     templateUrl: './radarr-recent.component.html',
     styles: ``
 })
@@ -23,6 +25,7 @@ export class RadarrRecentComponent implements OnInit {
 
     private dataService = inject(RadarrDataService);
     private timeAgoPipe = inject(TimeAgoPipe);
+    private tmdbImagePipe = inject(TmdbImagePipe);
 
     movies = signal<RadarrMovie[]>([]);
 
@@ -34,7 +37,7 @@ export class RadarrRecentComponent implements OnInit {
         this.dataService.loadMovies(this.serviceId).subscribe(() => {
             const allMovies = this.dataService.getMoviesForService(this.serviceId);
             const sorted = allMovies.sort((a, b) => new Date(b.added).getTime() - new Date(a.added).getTime());
-            this.movies.set(sorted.slice(0, Math.min(50,sorted.length) ));
+            this.movies.set(sorted.slice(0, Math.min(50, sorted.length)));
         });
     }
 
@@ -44,7 +47,7 @@ export class RadarrRecentComponent implements OnInit {
         return {
             id: movie.id,
             title: movie.title,
-            imageUrl: poster,
+            imageUrl: this.tmdbImagePipe.transform(poster, 'w185'),
             clickAction: () => this.openDetails(movie),
             accentColor: 'text-amber-400',
             topRightBadge: movie.ratings?.value ? {
@@ -60,7 +63,6 @@ export class RadarrRecentComponent implements OnInit {
 
     openDetails(movie: RadarrMovie) {
         this.detailsModal.type = 'movie';
-        // Radarr movies have tmdbId. Pass it to modal to resolve Trakt ID.
         this.detailsModal.tmdbId = movie.tmdbId;
         this.detailsModal.open();
     }
