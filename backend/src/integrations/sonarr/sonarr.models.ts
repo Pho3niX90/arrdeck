@@ -1,0 +1,118 @@
+export interface SonarrSeries {
+    title: string;
+    sortTitle: string;
+    seasonCount: number;
+    status: string;
+    overview: string;
+    network: string;
+    airTime?: string;
+    images: SonarrImage[];
+    seasons: SonarrSeason[];
+    year: number;
+    path: string;
+    profileId: number;
+    languageProfileId: number;
+    seasonFolder: boolean;
+    monitored: boolean;
+    useSceneNumbering: boolean;
+    runtime: number;
+    tvdbId: number;
+    tvRageId: number;
+    tvMazeId: number;
+    firstAired?: string;
+    lastInfoSync?: string;
+    seriesType: string;
+    cleanTitle: string;
+    imdbId?: string;
+    titleSlug: string;
+    certification?: string;
+    genres: string[];
+    tags: any[];
+    added: string;
+    ratings: SonarrRatings;
+    qualityProfileId: number;
+    id: number;
+}
+
+export interface SonarrImage {
+    coverType: string; // 'poster', 'banner', 'fanart'
+    url: string;
+    remoteUrl?: string;
+}
+
+export interface SonarrSeason {
+    seasonNumber: number;
+    monitored: boolean;
+    statistics?: {
+        episodeFileCount: number;
+        episodeCount: number;
+        totalEpisodeCount: number;
+        sizeOnDisk: number;
+        percentOfEpisodes: number;
+    };
+}
+
+export interface SonarrRatings {
+    votes: number;
+    value: number;
+}
+
+export interface SonarrEpisode {
+    seriesId: number;
+    episodeFileId: number;
+    seasonNumber: number;
+    episodeNumber: number;
+    title: string;
+    airDate?: string;
+    airDateUtc?: string;
+    overview?: string;
+    hasFile: boolean;
+    monitored: boolean;
+    absoluteEpisodeNumber?: number;
+    sceneAbsoluteEpisodeNumber?: number;
+    sceneEpisodeNumber?: number;
+    sceneSeasonNumber?: number;
+    unverifiedSceneNumbering: boolean;
+    id: number;
+    series?: SonarrSeries;
+}
+
+export interface SonarrQueueItem {
+    seriesId: number;
+    episodeId: number;
+    language: {
+        id: number;
+        name: string;
+    };
+    quality: {
+        quality: {
+            id: number;
+            name: string;
+        };
+        revision: {
+            version: number;
+            real: number;
+            isRepack: boolean;
+        };
+    };
+    size: number;
+    title: string;
+    sizeleft: number;
+    timeleft: string;
+    estimatedCompletionTime: string;
+    status: string;
+    trackedDownloadStatus: string;
+    statusMessages: any[];
+    downloadId: string;
+    protocol: string;
+    id: number;
+}
+
+export interface SonarrQueueResponse {
+    page: number;
+    pageSize: number;
+    sortKey: string;
+    sortDirection: string;
+    totalRecords: number;
+    records: SonarrQueueItem[];
+}
