@@ -1,93 +1,95 @@
 # ArrDeck
 
-A modern, consolidated media dashboard for your *Arr suite (Sonarr, Radarr) with intelligent AI-powered recommendations.
+A modern, consolidated media dashboard for your *Arr suite (Sonarr, Radarr) featuring intelligent, conversational AI recommendations and library management.
 
-# Warning: This project is in early development.
+![ArrDeck Banner](https://placeholder-banner-link.com) <!-- Replace with actual banner if available -->
 
 ## Features
 
 ### 🚀 Centralized Dashboard
-*   **Upcoming Schedule**: View your TV show calendar at a glance.
+*   **Upcoming Schedule**: View your TV show and movie releases in a unified **Calendar**.
 *   **Recent Downloads**: Track your latest media acquisitions from both Sonarr and Radarr.
-*   **Trakt Trending**: See what's popular in the world right now.
-*   **Library Overview**: Quick stats and access to your movie and show libraries.
+*   **Trakt Trending**: See what's popular globally with "In Library" indicators.
+*   **Statistics**: Visualize your library growth, disk space usage, and quality profiles.
 
-### 🧠 AI Recommendations
-ArrDeck analyzes your existing library (top-rated and recent items) and uses Generative AI (Google Gemini or Ollama) to suggest what to watch next.
-*   **Context-Aware**: Suggestions are based on what you *actually* like.
-*   **Auto-Trigger**: Recommendations are fetched automatically on load.
-*   **Metadata Enrichment**: Posters, years, and actionable "Add" buttons are automatically fetched.
-*   **In-Library Detection**: See instantly if a recommendation is already in your collection (Green Checkmark).
+### 🧠 Intelligent AI Chat
+ArrDeck features a context-aware AI assistant (powered by Google Gemini or Ollama) that knows your library.
+*   **Conversational Recommendations**: Ask "What should I watch?" and get suggestions based on your existing collection.
+*   **Tool Calling**: Simply say **"Add Inception to my library"** and the AI will search and add it to Radarr/Sonarr for you.
+*   **Deep Context**: The AI avoids recommending things you already own.
+*   **Interactive Cards**: Click on AI-suggested movies to view details or add them immediately.
 
-### ⚡ Performance
-*   **Backend Caching**: Library scans for Sonarr and Radarr are cached for 5 minutes, ensuring the dashboard loads instantly.
+### 📱 Modern & Responsive
+*   **Mobile First**: Fully responsive layout with a polished mobile drawer and touch-friendly controls.
+*   **Smooth Animations**: Enjoy fluid transitions and a glassmorphism UI design.
+*   **Lazy Loading**: Optimized for performance with fast load times.
 
-## Configuration
-
-Navigate to the **Settings** page to configure your integrations:
-
-1.  **Sonarr**: Enter your instance URL (e.g., `http://localhost:8989`) and API Key.
-2.  **Radarr**: Enter your instance URL (e.g., `http://localhost:7878`) and API Key.
-3.  **AI Service**: 
-    *   **Provider**: Choose between **Google Gemini** (Cloud) or **Ollama** (Local).
-    *   **API Key/URL**: Enter your Gemini API Key or local Ollama URL.
-    *   **Model**: Dynamically fetch and select available models (e.g., `gemini-2.5-flash`, `llama3.2`).
-
-## Details View
-
-Click on any movie or show card to view rich details, including cast, overview, and ratings.
-
-## Development Setup
-
-ArrDeck is a monorepo consisting of a NestJS backend and Angular frontend.
+## 🛠️ Setup & Configuration
 
 ### Prerequisites
-*   Node.js (v18+)
-*   Docker & Docker Compose (optional, for full stack)
+*   Docker & Docker Compose
+*   *Optional*: Node.js (v20+) for manual development
 
-### Deployment Options
+### Quick Start (Docker)
 
-ArrDeck provides 4 different Docker Compose configurations to suit your needs:
+1.  **Clone the repository** (or download the docker-compose file).
+2.  **Configure Environment**:
+    Create a `.env` file or modify `docker-compose.prod.yml`:
+    ```env
+    DB_HOST=postgres
+    DB_PASSWORD=arrdeck
+    # ... other vars
+    ```
+3.  **Run**:
+    ```bash
+    docker compose -f docker-compose.prod.yml up -d
+    ```
+4.  **Access**: Open `http://localhost:3000`
 
-#### 1. Full Stack Development
-Runs the full stack (Frontend, Backend, Database) and builds from local source. Best for development.
-```bash
-docker compose up --build
-```
+### ⚙️ Configuration
+Once running, navigate to the **Settings** page:
 
-#### 2. Production (GHCR Image)
-Runs the full stack but pulls the pre-built image from GitHub Container Registry. Best for usage.
-```bash
-docker compose -f docker-compose.prod.yml up -d
-```
+1.  **Integrations**:
+    *   **Sonarr/Radarr**: Enter your URL (e.g., `http://192.168.1.10:8989`) and API Key.
+2.  **AI Service**:
+    *   Choose **Google Gemini** (Cloud) or **Ollama** (Local).
+    *   Enter your API Key or Ollama URL.
+    *   **Pro Tip**: Select `gemini-1.5-flash` for fast, cost-effective responses.
 
-#### 3. Database Only (Development)
-Runs only the PostgreSQL database. Useful if you are running the backend/frontend locally via `npm run start:dev`.
-```bash
-docker compose -f docker-compose.postgress.yml up -d
-```
+## 🤖 AI Capabilities
 
-#### 4. Database Only (Production)
-Runs only the PostgreSQL database with production settings. Useful if you are running the binary/jar standalone but want a containerized DB.
-```bash
-docker compose -f docker-compose.postgress.prod.yml up -d
-```
+The AI isn't just a chatbot; it's a library manager.
+*   **"Find me 90s action movies"**: Returns a list of curated hits.
+*   **"Add the first one"**: Contextually adds the movie from the previous turn.
+*   **"Do I have The Office?"**: Checks your Sonarr library instantly.
 
-Access the app at `http://localhost:3000`.
+## 🏗️ Development
+
+ArrDeck is a monorepo (NestJS Backend + Angular Frontend).
 
 ### Manual Setup
 
-#### Backend
-```bash
-cd backend
-npm install
-# Set up .env with DB credentials (see .env.example)
-npm run start:dev
-```
+1.  **Backend**:
+    ```bash
+    cd backend
+    npm install
+    npm run start:dev
+    ```
 
-#### Frontend
-```bash
-cd frontend
-npm install
-npm start
-```
+2.  **Frontend**:
+    ```bash
+    cd frontend
+    npm install
+    npm start
+    ```
+
+## 🤝 Contributing
+
+We welcome issues and pull requests!
+*   **Bug Reports**: Use the template to report issues.
+*   **Feature Requests**: Have an idea? Let us know.
+
+## License
+
+[MIT](LICENSE)
+

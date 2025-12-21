@@ -1,18 +1,15 @@
 services:
   arrdeck:
-    # Replace with your actual image name, e.g., ghcr.io/username/arrdeck:latest
-    # or set the IMAGE_NAME environment variable
     image: ${IMAGE_NAME:-ghcr.io/pho3nix90/arrdeck:latest}
     ports:
       - "4877:4877"
     environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT:-5432}
       - DB_USERNAME=${DB_USERNAME:-arrdeck}
       - DB_PASSWORD=${DB_PASSWORD:-arrdeck}
       - DB_DATABASE=${DB_DATABASE:-arrdeck}
       - CLIENT_PATH=/app/client
+    env_file:
+      - .env
     restart: always
-
-volumes:
-  postgres_data:
