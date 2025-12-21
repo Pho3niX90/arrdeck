@@ -112,6 +112,10 @@ jobs:
           git add frontend/package.json backend/package.json
           git diff --exit-code || (git commit -m "chore: bump version to v${{ env.version }}" && git push)
 
+      - name: Lowercase Repository Name
+        run: |
+          echo "REPO_NAME_LOWER=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+
       - name: Build and Push Docker Image
         if: env.is_higher_version == 'true'
         uses: docker/build-push-action@v5
@@ -119,8 +123,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:v${{ env.version }}
+            ghcr.io/${{ env.REPO_NAME_LOWER }}:latest
+            ghcr.io/${{ env.REPO_NAME_LOWER }}:v${{ env.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
