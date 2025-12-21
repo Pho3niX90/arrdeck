@@ -14,6 +14,9 @@ import { User } from './users/user.entity';
 import { Service } from './services/service.entity';
 import { ProxyModule } from './proxy/proxy.module';
 import { IntegrationsModule } from './integrations/integrations.module';
+import { EventsModule } from './events/events.module';
+import { MetadataModule } from './metadata/metadata.module';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -62,8 +65,11 @@ import { IntegrationsModule } from './integrations/integrations.module';
     ProxyModule,
     IntegrationsModule,
     AiModule,
+    EventsModule,
+    MetadataModule,
+    StatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

@@ -4,7 +4,12 @@ import { AiService } from './ai.service';
 
 @Controller('ai')
 export class AiController {
-  constructor(private readonly aiService: AiService) {}
+  constructor(private readonly aiService: AiService) { }
+
+  @Post('chat')
+  async chat(@Body() body: { prompt: string; history?: any[] }) {
+    return this.aiService.chat(body.prompt, body.history);
+  }
 
   @Post('recommendations')
   @HttpCode(200)
