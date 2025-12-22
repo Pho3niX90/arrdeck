@@ -1,26 +1,9 @@
-import {Component, computed, inject, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {ServiceConfig, ServicesService, ServiceType} from '../../services/services';
-import {SonarrService} from '../../integrations/sonarr/sonarr.service';
-import {RadarrService} from '../../integrations/radarr/radarr.service';
-import {catchError, forkJoin, map, of} from 'rxjs';
-import {DetailsModalComponent} from '../../components/details-modal/details-modal.component';
-
-export interface LibraryItem {
-  uniqueId: string; // type-id
-  type: 'movie' | 'show';
-  title: string;
-  year: number;
-  overview: string;
-  tmdbId: number;
-  tvdbId?: number;
-  posterUrl?: string;
-  rating: number;
-  added: Date;
-  status: string;
-  serviceId: number;
-}
+import { Component, computed, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ServiceConfig, ServicesService } from '../../services/services';
+import { LibraryItem, LibraryService } from '../../services/library.service';
+import { DetailsModalComponent } from '../../components/details-modal/details-modal.component';
 
 @Component({
   selector: 'app-library',
@@ -31,8 +14,7 @@ export interface LibraryItem {
 })
 export class LibraryPage {
   private servicesService = inject(ServicesService);
-  private sonarrService = inject(SonarrService);
-  private radarrService = inject(RadarrService);
+  private libraryService = inject(LibraryService);
 
   services = signal<ServiceConfig[]>([]);
   items = signal<LibraryItem[]>([]);
@@ -46,65 +28,21 @@ export class LibraryPage {
   detailsModal = signal<{ type: 'movie' | 'show', tmdbId: number, tvdbId?: number } | null>(null);
 
   constructor() {
+    this.servicesService.getServices().subscribe(s => this.services.set(s));
     this.loadLibrary();
   }
 
   loadLibrary() {
     this.loading.set(true);
-    this.servicesService.getServices().subscribe(services => {
-      this.services.set(services);
-
-      const requests = services.map(service => {
-        if (service.type === ServiceType.RADARR) {
-          return this.radarrService.getMovies(service.id!).pipe(
-            map(movies => movies.map(m => ({
-              uniqueId: `m-${m.tmdbId}`,
-              type: 'movie' as const,
-              title: m.title,
-              year: m.year,
-              overview: m.overview,
-              tmdbId: m.tmdbId,
-              posterUrl: m.images?.find(i => i.coverType === 'poster')?.remoteUrl,
-              rating: m.ratings?.value || 0,
-              added: new Date(m.added),
-              status: m.status,
-              serviceId: service.id!
-            }))),
-            catchError(err => {
-              console.error(`Failed to load Radarr ${service.name}`, err);
-              return of([]);
-            })
-          );
-        } else if (service.type === ServiceType.SONARR) {
-          return this.sonarrService.getSeries(service.id!).pipe(
-            map(shows => shows.map(s => ({
-              uniqueId: `s-${(s as any).tvdbId || s.id}`,
-              type: 'show' as const,
-              title: s.title,
-              year: s.year,
-              overview: s.overview,
-              tmdbId: (s as any).tmdbId || 0, // Sonarr v4 has tmdbId usually
-              tvdbId: (s as any).tvdbId,
-              posterUrl: s.images?.find(i => i.coverType === 'poster')?.remoteUrl,
-              rating: s.ratings?.value || 0,
-              added: new Date(s.added),
-              status: s.status,
-              serviceId: service.id!
-            }))),
-            catchError(err => {
-              console.error(`Failed to load Sonarr ${service.name}`, err);
-              return of([]);
-            })
-          );
-        }
-        return of([]);
-      });
-
-      forkJoin(requests).subscribe(results => {
-        const allItems = results.flat().sort((a, b) => b.added.getTime() - a.added.getTime());
-        this.items.set(allItems);
+    this.libraryService.getLibraryItems().subscribe({
+      next: (items) => {
+        this.items.set(items);
         this.loading.set(false);
-      });
+      },
+      error: (e) => {
+        console.error('Failed to load library', e);
+        this.loading.set(false);
+      }
     });
   }
 
@@ -127,16 +65,11 @@ export class LibraryPage {
     // Sort
     result = [...result].sort((a, b) => { // Create copy to not mutate signal source if it was ref
       switch (sort) {
-        case 'added':
-          return b.added.getTime() - a.added.getTime();
-        case 'title':
-          return a.title.localeCompare(b.title);
-        case 'year':
-          return b.year - a.year;
-        case 'rating':
-          return b.rating - a.rating;
-        default:
-          return 0;
+        case 'added': return b.added.getTime() - a.added.getTime();
+        case 'title': return a.title.localeCompare(b.title);
+        case 'year': return b.year - a.year;
+        case 'rating': return b.rating - a.rating;
+        default: return 0;
       }
     });
 

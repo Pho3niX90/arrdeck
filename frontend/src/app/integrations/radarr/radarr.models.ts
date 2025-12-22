@@ -28,6 +28,7 @@ export interface RadarrMovie {
     ratings: RadarrRating;
     genres: string[];
     tmdbId: number;
+    runtime: number; // minutes
 }
 
 export interface RadarrQueueItem {

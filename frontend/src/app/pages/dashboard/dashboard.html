@@ -5,13 +5,13 @@
   </div>
 
   @if (services().length === 0) {
-    <div class="text-center py-20 bg-slate-900/50 rounded-2xl border border-slate-800 border-dashed">
-      <p class="text-slate-500 mb-4">No services configured yet.</p>
-      <a href="/settings"
-         class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-        Configure Services
-      </a>
-    </div>
+  <div class="text-center py-20 bg-slate-900/50 rounded-2xl border border-slate-800 border-dashed">
+    <p class="text-slate-500 mb-4">No services configured yet.</p>
+    <a href="/settings"
+      class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+      Configure Services
+    </a>
+  </div>
   }
 
   <!-- Widgets Grid -->
@@ -20,66 +20,79 @@
 
     @for (service of services(); track service.id) {
 
-      <!-- Sonarr Widgets -->
-      @if (service.type === 'sonarr') {
-        <div class="h-96">
-          <app-sonarr-calendar [serviceId]="service.id!"></app-sonarr-calendar>
-        </div>
-        <div class="h-96">
-          <app-queue-widget [serviceId]="service.id!" type="sonarr"></app-queue-widget>
-        </div>
-        <div class="h-96">
-          <app-sonarr-recent [serviceId]="service.id!"></app-sonarr-recent>
-        </div>
-        <div class="h-96">
-          <app-ai-recommendations-widget [serviceId]="service.id!" type="sonarr"></app-ai-recommendations-widget>
-        </div>
-      }
+    <!-- Sonarr Widgets -->
+    @if (service.type === 'sonarr') {
+    <div class="h-96">
+      <app-sonarr-calendar [serviceId]="service.id!"></app-sonarr-calendar>
+    </div>
+    <div class="h-96">
+      <app-queue-widget [serviceId]="service.id!" type="sonarr"></app-queue-widget>
+    </div>
+    <div class="h-96">
+      <app-sonarr-recent [serviceId]="service.id!"></app-sonarr-recent>
+    </div>
+    <div class="h-96">
+      <app-ai-recommendations-widget [serviceId]="service.id!" type="sonarr"></app-ai-recommendations-widget>
+    </div>
+    }
 
-      <!-- Radarr Widgets -->
-      @if (service.type === 'radarr') {
-        <div class="h-96">
-          <app-radarr-recommended [serviceId]="service.id!"></app-radarr-recommended>
-        </div>
-        <div class="h-96">
-          <app-queue-widget [serviceId]="service.id!" type="radarr"></app-queue-widget>
-        </div>
-        <div class="h-96">
-          <app-radarr-recent [serviceId]="service.id!"></app-radarr-recent>
-        </div>
-        <div class="h-96">
-          <app-ai-recommendations-widget [serviceId]="service.id!" type="radarr"></app-ai-recommendations-widget>
-        </div>
-      }
+    <!-- Radarr Widgets -->
+    @if (service.type === 'radarr') {
+    <div class="h-96">
+      <app-radarr-recommended [serviceId]="service.id!"></app-radarr-recommended>
+    </div>
+    <div class="h-96">
+      <app-queue-widget [serviceId]="service.id!" type="radarr"></app-queue-widget>
+    </div>
+    <div class="h-96">
+      <app-radarr-recent [serviceId]="service.id!"></app-radarr-recent>
+    </div>
+    <div class="h-96">
+      <app-ai-recommendations-widget [serviceId]="service.id!" type="radarr"></app-ai-recommendations-widget>
+    </div>
+    }
 
-      <!-- Trakt Widgets -->
-      @if (service.type === 'trakt') {
-        <!-- Unified Recommendations replace default Trakt Recommended -->
-        <div class="h-96">
-          <app-unified-recommendations type="movie"></app-unified-recommendations>
-        </div>
-        <div class="h-96">
-          <app-unified-recommendations type="show"></app-unified-recommendations>
-        </div>
+    <!-- Trakt Widgets -->
+    @if (service.type === 'trakt') {
+    <!-- Unified Recommendations replace default Trakt Recommended -->
+    <div class="h-96">
+      <app-unified-recommendations type="movie"></app-unified-recommendations>
+    </div>
+    <div class="h-96">
+      <app-unified-recommendations type="show"></app-unified-recommendations>
+    </div>
 
-        <div class="h-96">
-          <app-trakt-trending-movies [serviceId]="service.id!"></app-trakt-trending-movies>
-        </div>
-        <!--
+    <div class="h-96">
+      <app-trakt-trending-movies [serviceId]="service.id!"></app-trakt-trending-movies>
+    </div>
+    <!--
         <div class="h-96">
             <app-trakt-recommended-movies [serviceId]="service.id!"></app-trakt-recommended-movies>
         </div>
         -->
-        <div class="h-96">
-          <app-trakt-trending-shows [serviceId]="service.id!"></app-trakt-trending-shows>
-        </div>
-        <!--
+    <div class="h-96">
+      <app-trakt-trending-shows [serviceId]="service.id!"></app-trakt-trending-shows>
+    </div>
+    <!--
         <div class="h-96">
             <app-trakt-recommended-shows [serviceId]="service.id!"></app-trakt-recommended-shows>
         </div>
         -->
-      }
+    }
 
+    }
+
+    <!-- Smart Collections Row (Global, not per service) -->
+    @if (services().length > 0) {
+    <div class="h-96">
+      <app-smart-collection-widget title="Underrated Gems" type="underrated" icon="💎"></app-smart-collection-widget>
+    </div>
+    <div class="h-96">
+      <app-smart-collection-widget title="Marathon Worthy" type="marathon" icon="🍿"></app-smart-collection-widget>
+    </div>
+    <div class="h-96">
+      <app-smart-collection-widget title="Quick Watch" type="quick" icon="⚡"></app-smart-collection-widget>
+    </div>
     }
   </div>
 </div>
