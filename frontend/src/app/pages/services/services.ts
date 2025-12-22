@@ -115,6 +115,8 @@ export class Services implements OnInit {
         return 'images/trakt.svg';
       case ServiceType.TMDB:
         return 'images/tmdb.svg';
+      case ServiceType.JELLYFIN:
+        return 'images/jellyfin.png';
       case ServiceType.AI:
 
         return 'images/gemini.png'; // dynamic logic can be improved
