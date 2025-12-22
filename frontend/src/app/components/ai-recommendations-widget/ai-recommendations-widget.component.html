@@ -63,9 +63,24 @@
         </div>
         }
 
+        <!-- Enriching State (Animation) -->
+        @if (enriching()) {
+        <div class="enriching-container fade-in">
+            <div class="grid-background"></div>
+            <div class="scanner-line"></div>
+
+            <div class="pulsing-orb mb-6"></div>
+
+            <h3 class="text-white font-medium text-lg mb-1 relative z-10">Enriching Media Data</h3>
+            <p class="text-purple-300/70 text-xs text-center relative z-10 max-w-[200px]">
+                Matching recommendations with {{ type() === 'sonarr' ? 'Sonarr' : 'Radarr' }} library...
+            </p>
+        </div>
+        }
+
         <!-- Empty State -->
-        @if (!loading() && recommendations().length === 0 && !error()) {
-        <div class="flex flex-col items-center justify-center py-10 text-slate-500">
+        @if (!loading() && !enriching() && recommendations().length === 0 && !error()) {
+        <div class="flex flex-col items-center justify-center py-10 text-slate-500 h-full">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="w-12 h-12 mb-3 opacity-50">
                 <path stroke-linecap="round" stroke-linejoin="round"
