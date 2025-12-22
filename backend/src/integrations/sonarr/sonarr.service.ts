@@ -1,8 +1,8 @@
-import {Injectable, InternalServerErrorException, NotFoundException,} from '@nestjs/common';
-import {HttpService} from '@nestjs/axios';
-import {ServicesService} from '../../services/services.service';
-import {lastValueFrom} from 'rxjs';
-import {SonarrQueueResponse} from './sonarr.models';
+import { Injectable, InternalServerErrorException, NotFoundException, } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { ServicesService } from '../../services/services.service';
+import { lastValueFrom } from 'rxjs';
+import { SonarrQueueResponse } from './sonarr.models';
 
 @Injectable()
 export class SonarrService {
@@ -33,8 +33,8 @@ export class SonarrService {
         try {
             const response = await lastValueFrom(
                 this.httpService.get(url, {
-                    params: {...params, apikey: service.apiKey},
-                    headers: {'X-Api-Key': service.apiKey},
+                    params: { ...params, apikey: service.apiKey },
+                    headers: { 'X-Api-Key': service.apiKey },
                 }),
             );
             return response.data;
@@ -55,10 +55,10 @@ export class SonarrService {
     }
 
     async getCalendar(serviceId: number, start?: string, end?: string) {
-        return this.makeRequest(serviceId, 'calendar', {start, end});
+        return this.makeRequest(serviceId, 'calendar', { start, end });
     }
 
-    async getHistory(serviceId: number, page: number = 1, pageSize: number = 10) {
+    async getHistory(serviceId: number, page: number = 1, pageSize: number = 50) {
         return this.makeRequest(serviceId, 'history', {
             page,
             pageSize,
@@ -72,7 +72,7 @@ export class SonarrService {
     }
 
     async lookup(serviceId: number, term: string) {
-        return this.makeRequest(serviceId, 'series/lookup', {term});
+        return this.makeRequest(serviceId, 'series/lookup', { term });
     }
 
     async getProfiles(serviceId: number) {
@@ -91,8 +91,8 @@ export class SonarrService {
         try {
             const response = await lastValueFrom(
                 this.httpService.post(url, seriesFn, {
-                    params: {apikey: service.apiKey},
-                    headers: {'X-Api-Key': service.apiKey},
+                    params: { apikey: service.apiKey },
+                    headers: { 'X-Api-Key': service.apiKey },
                 }),
             );
             return response.data;
@@ -113,7 +113,10 @@ export class SonarrService {
     }
 
     async getQueue(serviceId: number): Promise<SonarrQueueResponse> {
-        return this.makeRequest(serviceId, 'queue');
+        return this.makeRequest(serviceId, 'queue', {
+            pageSize: 1000,
+            includeUnknownSeriesItems: true,
+        });
     }
 
     async getDiskSpace(serviceId: number) {
@@ -121,6 +124,6 @@ export class SonarrService {
     }
 
     async getEpisodes(serviceId: number, seriesId: number) {
-        return this.makeRequest(serviceId, 'episode', {seriesId});
+        return this.makeRequest(serviceId, 'episode', { seriesId });
     }
 }

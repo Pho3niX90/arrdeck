@@ -30,7 +30,7 @@ export class SonarrController {
     getHistory(
         @Param('id') id: string,
         @Query('page') page: number = 1,
-        @Query('pageSize') pageSize: number = 10,
+        @Query('pageSize') pageSize: number = 50,
     ) {
         return this.sonarrService.getHistory(+id, page, pageSize);
     }

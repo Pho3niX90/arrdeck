@@ -84,6 +84,7 @@ export class QueueWidgetComponent implements OnInit, OnDestroy {
     if (isNaN(size) || isNaN(sizeleft)) return 0;
 
     const progress = ((size - sizeleft) / size) * 100;
+    console.log(item.title, progress);
     return Math.min(100, Math.max(0, progress));
   }
 
