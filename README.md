@@ -2,27 +2,38 @@
 
 A modern, consolidated media dashboard for your *Arr suite (Sonarr, Radarr) featuring intelligent, conversational AI recommendations and library management.
 
-![ArrDeck Banner](https://placeholder-banner-link.com) <!-- Replace with actual banner if available -->
+## Why ArrDeck?
+
+Managing a media home lab often involves jumping between tabs: Sonarr for TV, Radarr for movies, Plex/Jellyfin for watching, and Trakt for discovery. **ArrDeck consolidates this chaos.**
+
+Unlike static dashboards that just link to services, ArrDeck is **deeply integrated**:
+*   **It knows what you have:** The AI doesn't just suggest movies; it checks if you already own them.
+*   **It takes action:** Don't just read about a show—tell specific cards to add it, or ask the AI to "Get that for me."
+*   **It's unified:** View your entire upcoming release schedule and download queue in one place.
 
 ## Features
 
-### 🚀 Centralized Dashboard
-*   **Upcoming Schedule**: View your TV show and movie releases in a unified **Calendar**.
-*   **Recent Downloads**: Track your latest media acquisitions from both Sonarr and Radarr.
-*   **Trakt Trending**: See what's popular globally with "In Library" indicators.
-*   **Statistics**: Visualize your library growth, disk space usage, and quality profiles.
+### 🧩 Unified Dashboard Cards
+ArrDeck centralizes your critical data into bite-sized, interactive widgets:
 
-### 🧠 Intelligent AI Chat
-ArrDeck features a context-aware AI assistant (powered by Google Gemini or Ollama) that knows your library.
-*   **Conversational Recommendations**: Ask "What should I watch?" and get suggestions based on your existing collection.
-*   **Tool Calling**: Simply say **"Add Inception to my library"** and the AI will search and add it to Radarr/Sonarr for you.
-*   **Deep Context**: The AI avoids recommending things you already own.
-*   **Interactive Cards**: Click on AI-suggested movies to view details or add them immediately.
+*   **📅 Upcoming Schedule**: A unified calendar view combining Sonarr and Radarr releases. Know exactly what's premiering tonight without checking two different apps.
+*   **📥 Active Queue**: Real-time monitoring of your downloads. Pause, resume, or cancel downloads directly from the dashboard.
+*   **📀 Recent Downloads**: A visual feed of the latest content added to your library.
+*   **🎬 Trakt Trending**: See what's popular worldwide right now. Items already in your library are clearly marked, saving you from accidental double-downloads.
+*   **📊 Library Stats**: Beautiful visualizations of your collection size, quality profiles, and disk usage.
 
-### 📱 Modern & Responsive
-*   **Mobile First**: Fully responsive layout with a polished mobile drawer and touch-friendly controls.
-*   **Smooth Animations**: Enjoy fluid transitions and a glassmorphism UI design.
-*   **Lazy Loading**: Optimized for performance with fast load times.
+### 🧠 Context-Aware AI Assistant
+Powered by **Google Gemini** or **Ollama**, the built-in AI isn't just a chatbot—it's a library admin.
+
+*   **"What should I watch?"**: Get recommendations based on your actual library content.
+*   **"Add Inception"**: The AI leverages function calling to search Radarr and add movies securely via their API.
+*   **"Do I have The Office?"**: Instantly queries Sonarr inventory to prevent duplicates.
+*   **Smart Context**: It acts as a bridge between your desire and your database, filtering out things you've already seen or own.
+
+### 📱 Modern User Experience
+*   **Glassmorphism Design**: A premium, modern UI that looks great on any screen.
+*   **Mobile-First**: Fully responsive with a dedicated mobile drawer and touch-optimized controls. Manage your server from the couch.
+*   **Lazy Loading**: Optimized performance ensures the dashboard loads instantly, even with large libraries.
 
 ## 🛠️ Setup & Configuration
 
@@ -54,14 +65,7 @@ Once running, navigate to the **Settings** page:
 2.  **AI Service**:
     *   Choose **Google Gemini** (Cloud) or **Ollama** (Local).
     *   Enter your API Key or Ollama URL.
-    *   **Pro Tip**: Select `gemini-1.5-flash` for fast, cost-effective responses.
-
-## 🤖 AI Capabilities
-
-The AI isn't just a chatbot; it's a library manager.
-*   **"Find me 90s action movies"**: Returns a list of curated hits.
-*   **"Add the first one"**: Contextually adds the movie from the previous turn.
-*   **"Do I have The Office?"**: Checks your Sonarr library instantly.
+    *   **Pro Tip**: Select `gemini-2.5-flash` for fast, cost-effective responses.
 
 ## 🏗️ Development
 
@@ -92,4 +96,3 @@ We welcome issues and pull requests!
 ## License
 
 [MIT](LICENSE)
-
