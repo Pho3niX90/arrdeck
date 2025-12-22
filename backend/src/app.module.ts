@@ -58,7 +58,7 @@ import { MigrationService } from './database/migration.service';
         password: configService.get<string>('DB_PASSWORD', 'arrdeck'),
         database: configService.get<string>('DB_DATABASE', 'arrdeck'),
         entities: [User, Service],
-        synchronize: true, // Auto-create tables (dev only, good for MVP)
+        synchronize: false,
       }),
     }),
     UsersModule,
