@@ -1,9 +1,9 @@
-import {Injectable, Logger} from '@nestjs/common';
-import {HttpService} from '@nestjs/axios';
-import {ConfigService} from '@nestjs/config';
-import {ServicesService} from '../../services/services.service';
-import {firstValueFrom} from 'rxjs';
-import {RadarrQueueResponse} from './radarr.models';
+import { Injectable, Logger } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { ServicesService } from '../../services/services.service';
+import { firstValueFrom } from 'rxjs';
+import { RadarrQueueResponse } from './radarr.models';
 
 @Injectable()
 export class RadarrService {
@@ -33,7 +33,7 @@ export class RadarrService {
         const url = `${config.url.replace(/\/$/, '')}${endpoint}`;
 
         try {
-            const {data} = await firstValueFrom(
+            const { data } = await firstValueFrom(
                 this.httpService.get(url, {
                     params: {
                         apikey: config.apiKey,
@@ -56,7 +56,7 @@ export class RadarrService {
         return this.makeRequest(serviceId, '/api/v3/movie');
     }
 
-    async getHistory(serviceId: number, page: number = 1, pageSize: number = 20) {
+    async getHistory(serviceId: number, page: number = 1, pageSize: number = 50) {
         return this.makeRequest(serviceId, '/api/v3/history', {
             page,
             pageSize,
@@ -67,7 +67,7 @@ export class RadarrService {
 
     async lookup(serviceId: number, term: string) {
         const [results, collections] = await Promise.all([
-            this.makeRequest(serviceId, '/api/v3/movie/lookup', {term}),
+            this.makeRequest(serviceId, '/api/v3/movie/lookup', { term }),
             this.makeRequest(serviceId, '/api/v3/collection')
         ]);
 
@@ -98,9 +98,9 @@ export class RadarrService {
         const url = `${config.url.replace(/\/$/, '')}/api/v3/movie`;
 
         try {
-            const {data} = await firstValueFrom(
+            const { data } = await firstValueFrom(
                 this.httpService.post(url, movieFn, {
-                    params: {apikey: config.apiKey},
+                    params: { apikey: config.apiKey },
                 }),
             );
             return data;
@@ -119,7 +119,10 @@ export class RadarrService {
     }
 
     async getQueue(serviceId: number): Promise<RadarrQueueResponse> {
-        return this.makeRequest(serviceId, '/api/v3/queue');
+        return this.makeRequest(serviceId, '/api/v3/queue', {
+            pageSize: 1000,
+            includeUnknownMovieItems: true,
+        });
     }
 
     async getDiskSpace(serviceId: number) {
@@ -131,9 +134,9 @@ export class RadarrService {
         const url = `${config.url.replace(/\/$/, '')}/api/v3/collection`;
 
         try {
-            const {data} = await firstValueFrom(
+            const { data } = await firstValueFrom(
                 this.httpService.post(url, collection, {
-                    params: {apikey: config.apiKey},
+                    params: { apikey: config.apiKey },
                 }),
             );
             return data;
@@ -148,9 +151,9 @@ export class RadarrService {
         const url = `${config.url.replace(/\/$/, '')}/api/v3/collection/${collection.id}`;
 
         try {
-            const {data} = await firstValueFrom(
+            const { data } = await firstValueFrom(
                 this.httpService.put(url, collection, {
-                    params: {apikey: config.apiKey},
+                    params: { apikey: config.apiKey },
                 }),
             );
             return data;
@@ -161,6 +164,6 @@ export class RadarrService {
     }
 
     async getCalendar(serviceId: number, start?: string, end?: string) {
-        return this.makeRequest(serviceId, '/api/v3/calendar', {start, end});
+        return this.makeRequest(serviceId, '/api/v3/calendar', { start, end });
     }
 }

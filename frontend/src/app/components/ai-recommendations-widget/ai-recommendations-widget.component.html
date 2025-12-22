@@ -45,11 +45,11 @@
         </button>
     </div>
 
-    <div class="p-6 h-full overflow-y-auto custom-scrollbar flex flex-col gap-4">
+    <div class="h-full overflow-y-auto custom-scrollbar flex flex-col gap-4">
 
         <!-- Controls (Just Input) -->
         @if (showPromptInput()) {
-        <div class="animate-fade-in-down mb-2">
+        <div class="animate-fade-in-down mb-2 p-6 pb-0">
             <textarea [(ngModel)]="customPrompt"
                 class="w-full bg-slate-900/50 border border-white/10 rounded-lg p-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50 transition-colors"
                 rows="2" placeholder="e.g. 'Space operas with complex politics' or '80s action movies'"></textarea>
@@ -58,14 +58,29 @@
 
         <!-- Error State -->
         @if (error()) {
-        <div class="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+        <div class="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center m-6">
             {{ error() }}
         </div>
         }
 
+        <!-- Enriching State (Animation) -->
+        @if (enriching()) {
+        <div class="enriching-container fade-in p-6">
+            <div class="grid-background"></div>
+            <div class="scanner-line"></div>
+
+            <div class="pulsing-orb mb-6"></div>
+
+            <h3 class="text-white font-medium text-lg mb-1 relative z-10">Enriching Media Data</h3>
+            <p class="text-purple-300/70 text-xs text-center relative z-10 max-w-[200px]">
+                Matching recommendations with {{ type() === 'sonarr' ? 'Sonarr' : 'Radarr' }} library...
+            </p>
+        </div>
+        }
+
         <!-- Empty State -->
-        @if (!loading() && recommendations().length === 0 && !error()) {
-        <div class="flex flex-col items-center justify-center py-10 text-slate-500">
+        @if (!loading() && !enriching() && recommendations().length === 0 && !error()) {
+        <div class="flex flex-col items-center justify-center py-10 text-slate-500 h-full p-6">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="w-12 h-12 mb-3 opacity-50">
                 <path stroke-linecap="round" stroke-linejoin="round"

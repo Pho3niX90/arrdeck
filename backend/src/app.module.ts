@@ -18,6 +18,8 @@ import { EventsModule } from './events/events.module';
 import { MetadataModule } from './metadata/metadata.module';
 import { StatsModule } from './stats/stats.module';
 
+import { MigrationService } from './database/migration.service';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -70,6 +72,6 @@ import { StatsModule } from './stats/stats.module';
     StatsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, MigrationService],
 })
 export class AppModule { }

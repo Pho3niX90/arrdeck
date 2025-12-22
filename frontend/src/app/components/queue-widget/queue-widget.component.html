@@ -1,73 +1,74 @@
 <app-widget-card [title]="'Active Downloads'" [subtitle]="type | titlecase">
   @if (queue() && queue().length > 0) {
-    <div class="space-y-3 max-h-88 overflow-y-auto px-2 custom-scrollbar">
-      @for (item of queue(); track item.title) {
-        <div
-          class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/50 hover:bg-slate-800/60 transition group relative overflow-hidden">
+  <div class="space-y-3 max-h-88 overflow-y-auto px-2 custom-scrollbar">
+    @for (item of queue(); track item.title) {
+    <div
+      class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/50 hover:bg-slate-800/60 transition group relative overflow-hidden">
 
-          <!-- Status Indicator Bar -->
-          <div class="absolute left-0 top-0 bottom-0 w-1" [ngClass]="{
-                     'bg-amber-500': item.status === 'Warning' || item.errorMessage,
-                     'bg-yellow-500': item.status === 'Paused',
-                     'bg-blue-500': item.status === 'Downloading' || item.status === 'Queued'
+      <!-- Status Indicator Bar -->
+      <div class="absolute left-0 top-0 bottom-0 w-1" [ngClass]="{
+                     'bg-amber-500': item.status.toLowerCase() === 'warning' || item.errorMessage,
+                     'bg-yellow-500': item.status.toLowerCase() === 'paused',
+                     'bg-blue-500': item.status.toLowerCase() === 'downloading' || item.status.toLowerCase() === 'queued'
                    }">
-          </div>
+      </div>
 
-          <div class="pl-3">
-            <div class="flex justify-between items-start mb-2">
-              <div class="min-w-0 pr-2">
-                <h4 class="font-medium text-slate-200 text-sm truncate" [title]="item.title">{{ item.title }}
-                </h4>
-                <div class="flex items-center gap-2 mt-1">
-                            <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded"
-                                  [ngClass]="{
-                                    'bg-amber-500/10 text-amber-400': item.status === 'Warning' || item.errorMessage,
-                                    'bg-yellow-500/10 text-yellow-400': item.status === 'Paused',
-                                    'bg-blue-500/10 text-blue-400': item.status === 'Downloading',
-                                    'bg-slate-500/10 text-slate-400': item.status === 'Queued'
+      <div class="pl-3">
+        <div class="flex justify-between items-start mb-2">
+          <div class="min-w-0 pr-2">
+            <h4 class="font-medium text-slate-200 text-sm truncate" [title]="item.title">{{ item.title }}
+            </h4>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded" [ngClass]="{
+                                    'bg-amber-500/10 text-amber-400': item.status.toLowerCase() === 'warning' || item.errorMessage,
+                                    'bg-yellow-500/10 text-yellow-400': item.status.toLowerCase() === 'paused',
+                                    'bg-blue-500/10 text-blue-400': item.status.toLowerCase() === 'downloading',
+                                    'bg-slate-500/10 text-slate-400': item.status.toLowerCase() === 'queued' || item.status.toLowerCase() === 'completed'
                                 }">
-                                {{ item.status }}
-                            </span>
-                  @if (item.timeleft && item.timeleft !== '00:00:00') {
-                    <span class="text-xs text-slate-400">{{ item.timeleft }} left</span>
-                  }
-                </div>
-              </div>
-              <div class="text-right shrink-0">
-                        <span class="text-xs font-mono text-slate-300">
-                            {{ formatBytes(item.size - item.sizeleft) }} / {{ formatBytes(item.size) }}
-                        </span>
-              </div>
+                {{ item.status }}
+              </span>
+              @if (item.timeleft && item.timeleft !== '00:00:00') {
+              <span class="text-xs text-slate-400">{{ item.timeleft }} left</span>
+              }
             </div>
-
-            <!-- Progress Bar -->
-            <div class="w-full bg-slate-700/50 rounded-full h-1.5 overflow-hidden mt-2">
-              <div class="h-1.5 rounded-full transition-all duration-500 relative overflow-hidden" [ngClass]="{
-                          'bg-amber-500': item.status === 'Warning' || item.errorMessage,
-                          'bg-yellow-500': item.status === 'Paused',
-                          'bg-blue-500': item.status === 'Downloading' || item.status === 'Queued'
-                        }" [style.width.%]="getProgress(item)">
-                <!-- Shimmer Effect for Downloading -->
-                @if (item.status === 'downloading') {
-                  <div class="absolute inset-0 bg-green-500/20 animate-[shimmer_2s_infinite]"></div>
-                }
-              </div>
-            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <span class="text-xs font-mono text-slate-300">
+              {{ formatBytes(item.size - item.sizeleft) }} / {{ formatBytes(item.size) }}
+            </span>
           </div>
         </div>
-      }
-    </div>
-  } @else {
-    <div class="flex flex-col items-center justify-center h-full min-h-48 text-slate-500">
-      <div class="w-16 h-16 rounded-full bg-slate-800/50 flex items-center justify-center mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-             stroke="currentColor" class="w-8 h-8 opacity-50">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
-        </svg>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-700/50 rounded-full h-1.5 overflow-hidden mt-2">
+          <div class="h-1.5 rounded-full transition-all duration-500 relative overflow-hidden" [ngClass]="{
+                          'bg-amber-500': item.status.toLowerCase() === 'warning' || item.errorMessage,
+                          'bg-yellow-500': item.status.toLowerCase() === 'paused',
+                          'bg-blue-500': item.status.toLowerCase() === 'downloading' || item.status.toLowerCase() === 'queued',
+                          'bg-green-500': item.status.toLowerCase() === 'completed'
+                        }" [style.width.%]="getProgress(item)">
+            <!-- Shimmer Effect for Downloading -->
+            @if (item.status.toLowerCase() === 'downloading') {
+            <div class="absolute inset-0 bg-green-500/20 animate-[shimmer_2s_infinite]"></div>
+            }
+          </div>
+        </div>
       </div>
-      <span class="text-sm font-medium">No active downloads</span>
-      <span class="text-xs text-slate-600 mt-1">Your queue is empty</span>
     </div>
+    }
+  </div>
+  } @else {
+  <div
+    class="flex flex-col items-center justify-center h-full min-h-48 text-slate-500 bg-slate-800/20 rounded-xl m-2 border border-slate-800 border-dashed">
+    <div class="w-12 h-12 rounded-full bg-slate-800/50 flex items-center justify-center mb-3 text-slate-600">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+        class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+      </svg>
+    </div>
+    <span class="text-sm font-medium text-slate-400">Queue Empty</span>
+    <span class="text-xs text-slate-600 mt-1">No active downloads</span>
+  </div>
   }
 </app-widget-card>

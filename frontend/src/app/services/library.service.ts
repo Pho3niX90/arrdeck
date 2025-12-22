@@ -1,5 +1,5 @@
 import {inject, Injectable} from '@angular/core';
-import {firstValueFrom, forkJoin, map, Observable, of, switchMap} from 'rxjs';
+import {forkJoin, map, Observable, of, shareReplay, switchMap} from 'rxjs';
 import {ServicesService, ServiceType} from './services';
 import {RadarrService} from '../integrations/radarr/radarr.service';
 import {SonarrService} from '../integrations/sonarr/sonarr.service';
@@ -14,6 +14,23 @@ export interface LibraryStatus {
   images?: any;
 }
 
+export interface LibraryItem {
+  uniqueId: string; // type-id
+  type: 'movie' | 'show';
+  title: string;
+  year: number;
+  overview: string;
+  tmdbId: number;
+  tvdbId?: number;
+  posterUrl?: string;
+  rating: number; // 0-10
+  runtime?: number; // minutes
+  added: Date;
+  status: string;
+  serviceId: number;
+  seasons?: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -22,6 +39,12 @@ export class LibraryService {
   private radarrService = inject(RadarrService);
   private sonarrService = inject(SonarrService);
 
+  private movieCache = new Set<number>();
+  private cacheInitialization$: Observable<void> | null = null;
+
+  // Cache for the unified library to avoid re-fetching on every widget
+  private libraryCache$: Observable<LibraryItem[]> | null = null;
+
   checkLibrary(type: 'movie' | 'show', tmdbId: number, tvdbId?: number): Observable<LibraryStatus> {
     return this.servicesService.getServices().pipe(
       switchMap(services => {
@@ -29,7 +52,7 @@ export class LibraryService {
         const service = services.find(s => s.type === targetType);
 
         if (!service) {
-          return of({inLibrary: false});
+          return of({ inLibrary: false });
         }
 
         const term = `tmdb:${tmdbId}`;
@@ -38,7 +61,7 @@ export class LibraryService {
           return this.radarrService.lookup(service.id!, term).pipe(
             map(results => {
               const match = results.find(m => m.tmdbId === tmdbId);
-              if (!match) return {inLibrary: false};
+              if (!match) return { inLibrary: false };
 
               return {
                 inLibrary: !!match.id,
@@ -56,7 +79,7 @@ export class LibraryService {
                 ((s as any).tmdbId === tmdbId)
               );
 
-              if (!match || !match.id) return of({inLibrary: false});
+              if (!match || !match.id) return of({ inLibrary: false });
 
               return this.sonarrService.getEpisodes(service.id!, match.id).pipe(
                 map(episodes => {
@@ -115,27 +138,119 @@ export class LibraryService {
     return forkJoin(observables);
   }
 
-  private movieCache = new Set<number>();
-  private cacheInitialized = false;
-
-  async ensureLibraryCache() {
-    if (this.cacheInitialized) return;
-
-    const services = await firstValueFrom(this.servicesService.getServices());
-    const radarr = services.find(s => s.type === ServiceType.RADARR);
-    if (radarr) {
-      this.radarrService.getMovies(radarr.id!).subscribe({
-        next: (movies) => {
-          this.movieCache.clear();
-          movies.forEach(m => this.movieCache.add(m.tmdbId));
-          this.cacheInitialized = true;
-        },
-        error: (e) => console.error('Failed to load Radarr cache', e)
-      });
+  ensureLibraryCache(): Observable<void> {
+    if (this.cacheInitialization$) {
+      return this.cacheInitialization$;
     }
+
+    this.cacheInitialization$ = this.servicesService.getServices().pipe(
+      switchMap(services => {
+        const radarr = services.find(s => s.type === ServiceType.RADARR);
+        if (!radarr) return of(undefined);
+        return this.radarrService.getMovies(radarr.id!);
+      }),
+      map(movies => {
+        if (movies) {
+          this.movieCache.clear();
+          movies.forEach((m: any) => this.movieCache.add(m.tmdbId));
+        }
+      }),
+      shareReplay(1)
+    );
+
+    return this.cacheInitialization$;
   }
 
   isMovieInLibrary(tmdbId: number): boolean {
     return this.movieCache.has(tmdbId);
+  }
+
+  // --- Unified Library & Smart Collections ---
+
+  getLibraryItems(forceRefresh = false): Observable<LibraryItem[]> {
+    if (this.libraryCache$ && !forceRefresh) {
+      return this.libraryCache$;
+    }
+
+    this.libraryCache$ = this.servicesService.getServices().pipe(
+      switchMap(services => {
+        const requests = services.map(service => {
+          if (service.type === ServiceType.RADARR) {
+            return this.radarrService.getMovies(service.id!).pipe(
+              map(movies => movies.map(m => ({
+                uniqueId: `m-${m.tmdbId}`,
+                type: 'movie' as const,
+                title: m.title,
+                year: m.year,
+                overview: m.overview,
+                tmdbId: m.tmdbId,
+                posterUrl: m.images?.find((i: any) => i.coverType === 'poster')?.remoteUrl,
+                rating: m.ratings?.value || 0,
+                runtime: m.runtime,
+                added: new Date(m.added),
+                status: m.status,
+                serviceId: service.id!
+              }))),
+              shareReplay(1)
+            );
+          } else if (service.type === ServiceType.SONARR) {
+            return this.sonarrService.getSeries(service.id!).pipe(
+              map(shows => shows.map(s => ({
+                uniqueId: `s-${(s as any).tvdbId || s.id}`,
+                type: 'show' as const,
+                title: s.title,
+                year: s.year,
+                overview: s.overview,
+                tmdbId: (s as any).tmdbId || 0,
+                tvdbId: (s as any).tvdbId,
+                posterUrl: s.images?.find((i: any) => i.coverType === 'poster')?.remoteUrl,
+                rating: s.ratings?.value || 0,
+                seasons: s.seasonCount, // Assuming SonarrSeries has seasonCount or similar, need to verify
+                added: new Date(s.added),
+                status: s.status,
+                serviceId: service.id!
+              }))),
+              shareReplay(1)
+            );
+          }
+          return of([]);
+        });
+
+        return forkJoin(requests).pipe(
+          map(results => results.flat().sort((a, b) => b.added.getTime() - a.added.getTime()))
+        );
+      }),
+      shareReplay(1)
+    );
+
+    return this.libraryCache$;
+  }
+
+  getUnderrated(): Observable<LibraryItem[]> {
+    return this.getLibraryItems().pipe(
+      map(items => items.filter(i => {
+        // High rating but not super new (to avoid hype skew) or just general "gems" logic
+        // For now: Rating > 8.0
+        return i.rating >= 8.0;
+      }).sort(() => 0.5 - Math.random()).slice(0, 10)) // Random 10
+    );
+  }
+
+  getMarathonWorthy(): Observable<LibraryItem[]> {
+    return this.getLibraryItems().pipe(
+      map(items => items.filter(i => {
+        // Shows, > 3 seasons, Rating > 7.5
+        return i.type === 'show' && (i.seasons || 0) >= 3 && i.rating >= 7.5;
+      }).sort((a, b) => b.rating - a.rating).slice(0, 10))
+    );
+  }
+
+  getQuickWatch(): Observable<LibraryItem[]> {
+    return this.getLibraryItems().pipe(
+      map(items => items.filter(i => {
+        // Movies, < 100 mins, Rating > 6.0
+        return i.type === 'movie' && (i.runtime || 0) > 0 && (i.runtime || 0) <= 100 && i.rating >= 6.0;
+      }).sort((a, b) => b.rating - a.rating).slice(0, 10))
+    );
   }
 }

@@ -1,8 +1,8 @@
 <div class="flex h-screen bg-slate-950 overflow-hidden">
   <!-- Mobile Overlay -->
   @if (isOpen()) {
-    <div (click)="isOpen.set(false)"
-         class="fixed inset-0 bg-black/80 z-40 lg:hidden backdrop-blur-sm transition-opacity"></div>
+  <div (click)="isOpen.set(false)" class="fixed inset-0 bg-black/80 z-40 lg:hidden backdrop-blur-sm transition-opacity">
+  </div>
   }
 
   <!-- Mobile Header -->
@@ -12,16 +12,16 @@
       ArrDeck
     </h1>
     <button (click)="isOpen.set(!isOpen())" class="p-2 text-slate-400 hover:text-white">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-           stroke="currentColor" class="w-6 h-6">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+        class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
       </svg>
     </button>
   </header>
 
   <!-- Sidebar -->
   <aside [class.translate-x-0]="isOpen()" [class.-translate-x-full]="!isOpen()"
-         class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-300 lg:static lg:translate-x-0">
+    class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-300 lg:static lg:translate-x-0">
     <div class="p-6 hidden lg:block">
       <h1 class="text-2xl font-bold bg-linear-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
         ArrDeck
@@ -30,39 +30,43 @@
 
     <div class="p-4 lg:hidden flex justify-end">
       <button (click)="isOpen.set(false)" class="p-2 text-slate-400">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-             stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+          class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
     </div>
 
     <nav class="flex-1 px-4 space-y-2 mt-4 lg:mt-0">
       <a routerLink="/" routerLinkActive="bg-white/10 text-white" [routerLinkActiveOptions]="{exact: true}"
-         class="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition">
+        class="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition">
         <span>Dashboard</span>
       </a>
+      <a routerLink="/library" routerLinkActive="bg-white/10 text-white"
+        class="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition">
+        <span>Library</span>
+      </a>
       <a routerLink="/calendar" routerLinkActive="bg-white/10 text-white"
-         class="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition">
+        class="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition">
         <span>Calendar</span>
       </a>
       <a routerLink="/stats" routerLinkActive="bg-white/10 text-white"
-         class="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition">
+        class="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition">
         <span>Statistics</span>
       </a>
       <a routerLink="/services" routerLinkActive="bg-white/10 text-white"
-         class="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition">
+        class="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition">
         <span>Services</span>
       </a>
       <a routerLink="/settings" routerLinkActive="bg-white/10 text-white"
-         class="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition">
+        class="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition">
         <span>Settings</span>
       </a>
     </nav>
 
     <div class="p-4 border-t border-slate-800">
       <button (click)="logout()"
-              class="w-full flex items-center justify-center space-x-2 px-4 py-2 text-red-400 hover:bg-red-400/10 rounded-lg transition">
+        class="w-full flex items-center justify-center space-x-2 px-4 py-2 text-red-400 hover:bg-red-400/10 rounded-lg transition">
         <span>Sign Out</span>
       </button>
     </div>
@@ -73,7 +77,7 @@
     <!-- Desktop Header & Search -->
     <header
       class="hidden lg:flex items-center justify-between h-20 px-8 border-b border-slate-800/50 bg-slate-950/50 backdrop-blur sticky top-0 z-20">
-      <div class="w-full max-w-2xl">
+      <div class="w-full max-w-lg">
         <app-global-search (openDetails)="onOpenDetails($event)"></app-global-search>
       </div>
       <div class="flex items-center gap-4">
@@ -88,9 +92,8 @@
 </div>
 
 @if (detailsModalOpen()) {
-  <app-details-modal [traktServiceId]="detailsTraktServiceId" [type]="detailsType" [tmdbId]="detailsTmdbId"
-                     [tvdbId]="detailsTvdbId" [traktId]="detailsTraktId"
-                     (close)="detailsModalOpen.set(false)"></app-details-modal>
+<app-details-modal [traktServiceId]="detailsTraktServiceId" [type]="detailsType" [tmdbId]="detailsTmdbId"
+  [tvdbId]="detailsTvdbId" [traktId]="detailsTraktId" (close)="detailsModalOpen.set(false)"></app-details-modal>
 }
 
 <app-ai-chat-widget (searchRequest)="onSearchRequest($event)"></app-ai-chat-widget>

@@ -1,14 +1,16 @@
-import {Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, signal, SimpleChanges} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {TmdbService} from '../../integrations/tmdb/tmdb.service';
-import {ServicesService, ServiceType} from '../../services/services';
-import {AddMediaModalComponent} from '../add-media-modal/add-media-modal.component';
-import {MetadataService, NormalizedDetails} from '../../services/metadata.service';
-import {LibraryService, LibraryStatus} from '../../services/library.service';
-import {MessageService} from '../../services/message.service';
-import {TmdbCollection, TmdbCredits, TmdbItem} from '../../integrations/tmdb/tmdb.models';
+import { Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, signal, SimpleChanges } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { take } from 'rxjs';
+import { TmdbService } from '../../integrations/tmdb/tmdb.service';
+import { ServicesService, ServiceType } from '../../services/services';
+import { AddMediaModalComponent } from '../add-media-modal/add-media-modal.component';
+import { MetadataService, NormalizedDetails } from '../../services/metadata.service';
+import { LibraryService, LibraryStatus } from '../../services/library.service';
+import { MessageService } from '../../services/message.service';
+import { TmdbCollection, TmdbCredits, TmdbItem } from '../../integrations/tmdb/tmdb.models';
+import { JellyfinService } from '../../integrations/jellyfin/jellyfin.service';
 
-import {TmdbImagePipe} from '../../pipes/tmdb-image.pipe';
+import { TmdbImagePipe } from '../../pipes/tmdb-image.pipe';
 
 @Component({
   selector: 'app-details-modal',
@@ -30,6 +32,7 @@ export class DetailsModalComponent implements OnInit, OnChanges {
   private servicesService = inject(ServicesService);
   private metadataService = inject(MetadataService);
   private libraryService = inject(LibraryService);
+  private jellyfinService = inject(JellyfinService);
   private messageService = inject(MessageService);
 
   isOpen = false;
@@ -52,6 +55,11 @@ export class DetailsModalComponent implements OnInit, OnChanges {
   collectionInfo = signal<TmdbCollection | null>(null); // { name: string, tmdbId: number, images: ... }
   expandedCollection = signal(false);
 
+  // Jellyfin
+  jellyfinUrl = signal<string | null>(null);
+  jellyfinItemId = signal<string | null>(null);
+  checkingJellyfin = signal(false);
+
   // Add Modal
   showAddModal = false;
 
@@ -59,12 +67,21 @@ export class DetailsModalComponent implements OnInit, OnChanges {
   private tmdbServiceId?: number;
 
   ngOnInit() {
-    this.libraryService.ensureLibraryCache();
+    this.libraryService.ensureLibraryCache().subscribe();
     this.servicesService.getServices().subscribe(services => {
       const tmdb = services.find(s => s.type === ServiceType.TMDB);
       if (tmdb) this.tmdbServiceId = tmdb.id;
+
+      const jellyfin = services.find(s => s.type === ServiceType.JELLYFIN);
+      if (jellyfin) {
+        this.jellyfinUrl.set(jellyfin.url);
+        // Store apiKey in a signal if needed or just use it in check
+        this.jellyfinApiKey = jellyfin.apiKey;
+      }
     });
   }
+
+  private jellyfinApiKey = '';
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['tmdbId'] || changes['traktId'] || changes['tvdbId']) {
@@ -86,6 +103,7 @@ export class DetailsModalComponent implements OnInit, OnChanges {
     this.inLibrary.set(false);
     this.sonarrEpisodes.set({});
     this.collectionInfo.set(null);
+    this.jellyfinItemId.set(null);
     this.resolveAndFetch();
   }
 
@@ -120,6 +138,10 @@ export class DetailsModalComponent implements OnInit, OnChanges {
         if (this.tmdbServiceId && this.tmdbId) {
           console.log(`USING TMDB ID ${this.tmdbId} for credits fetching`)
           this.fetchTmdbCredits();
+        }
+
+        if (this.jellyfinUrl() && this.jellyfinApiKey) {
+          this.checkJellyfin(details.title, details.year);
         }
       },
       error: (err) => {
@@ -170,7 +192,7 @@ export class DetailsModalComponent implements OnInit, OnChanges {
   fetchCollectionDetails(collectionId: number) {
     if (!this.tmdbServiceId) return;
     this.tmdbService.getCollection(this.tmdbServiceId, collectionId).subscribe(data => {
-      const tmdbData: any = {...data, tmdbId: data.id};
+      const tmdbData: any = { ...data, tmdbId: data.id };
       delete tmdbData.id;
 
       if (tmdbData.parts) {
@@ -241,7 +263,7 @@ export class DetailsModalComponent implements OnInit, OnChanges {
         if (status.inLibrary) this.inLibrary.set(true);
         if (status.collectionTmdbId) this.fetchCollectionDetails(status.collectionTmdbId);
         if (status.images) {
-          this.details.update(d => d ? ({...d, images: status.images}) : null);
+          this.details.update(d => d ? ({ ...d, images: status.images }) : null);
         }
         if (status.sonarrEpisodes) {
           this.sonarrEpisodes.set(status.sonarrEpisodes);
@@ -283,7 +305,7 @@ export class DetailsModalComponent implements OnInit, OnChanges {
     this.libraryService.addCollection(col, config).subscribe({
       next: () => {
         this.messageService.show('Collection movies added to Radarr queue', 'success');
-        this.collectionInfo.update(c => c ? {...c, monitored: true} : null);
+        this.collectionInfo.update(c => c ? { ...c, monitored: true } : null);
         this.fetchCollectionDetails(col.tmdbId!); // Refresh to show In Library status
       },
       error: (err) => {
@@ -291,5 +313,39 @@ export class DetailsModalComponent implements OnInit, OnChanges {
         this.messageService.show('Failed to save collection. Check console.', 'error');
       }
     });
+  }
+
+
+  checkJellyfin(title: string, year?: number) {
+    this.checkingJellyfin.set(true);
+    // Simple search query: title
+    // We can refine later
+    this.jellyfinService.search(this.jellyfinUrl()!, this.jellyfinApiKey, title).pipe(take(1)).subscribe({
+      next: (items) => {
+        // Try to find exact match
+        const match = items.find(i => {
+          if (i.Type.toLowerCase() !== (this.type === 'show' ? 'series' : 'movie')) return false;
+          // Optional year check
+          if (year && i.ProductionYear && i.ProductionYear !== year) return false;
+          return i.Name.toLowerCase() === title.toLowerCase();
+        });
+
+        if (match) {
+          this.jellyfinItemId.set(match.Id);
+        }
+        this.checkingJellyfin.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to search Jellyfin', err);
+        this.checkingJellyfin.set(false);
+      }
+    })
+  }
+
+  openInJellyfin() {
+    if (this.jellyfinUrl() && this.jellyfinItemId()) {
+      const url = this.jellyfinService.getDeepLink(this.jellyfinUrl()!, this.jellyfinItemId()!);
+      window.open(url, '_blank');
+    }
   }
 }

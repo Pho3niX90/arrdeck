@@ -1,4 +1,4 @@
-import {Column, Entity, PrimaryGeneratedColumn} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum ServiceType {
     SONARR = 'sonarr',
@@ -6,6 +6,7 @@ export enum ServiceType {
     PROWLARR = 'prowlarr',
     DELUGE = 'deluge',
     JELLYSEER = 'jellyseer',
+    JELLYFIN = 'jellyfin',
     TRAKT = 'trakt', // Trakt is external, might work differently (OAuth?), keeping it simple for now
     TVDB = 'tvdb',
     TMDB = 'tmdb',
@@ -31,9 +32,9 @@ export class Service {
     @Column()
     url: string;
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     apiKey: string;
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     model: string;
 }

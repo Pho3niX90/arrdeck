@@ -13,12 +13,27 @@ import {
 } from '../../components/ai-recommendations-widget/ai-recommendations-widget.component';
 import { QueueWidgetComponent } from '../../components/queue-widget/queue-widget.component';
 
+
+import { SmartCollectionWidget } from '../../components/smart-collection-widget/smart-collection-widget';
+
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, SonarrCalendarComponent, SonarrRecentComponent, RadarrRecentComponent, RadarrRecommendedComponent, TraktTrendingMoviesComponent, TraktTrendingShowsComponent, UnifiedRecommendationsComponent, AiRecommendationsWidgetComponent, QueueWidgetComponent],
+  imports: [
+    CommonModule,
+    SonarrCalendarComponent,
+    QueueWidgetComponent,
+    SonarrRecentComponent,
+    AiRecommendationsWidgetComponent,
+    RadarrRecommendedComponent,
+    RadarrRecentComponent,
+    TraktTrendingMoviesComponent,
+    TraktTrendingShowsComponent,
+    UnifiedRecommendationsComponent,
+    SmartCollectionWidget
+  ],
   templateUrl: './dashboard.html',
   styles: ``,
   animations: [

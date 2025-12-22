@@ -53,6 +53,11 @@ export class Settings implements OnInit {
       id: [null as number | null],
       apiKey: ['', Validators.required]
     }),
+    jellyfin: this.fb.group({
+      id: [null as number | null],
+      url: ['', Validators.required],
+      apiKey: ['', Validators.required]
+    }),
     ai: this.fb.group({
       id: [null as number | null],
       provider: ['gemini'],
@@ -152,6 +157,7 @@ export class Settings implements OnInit {
       const sonarr = services.find(s => s.type === ServiceType.SONARR);
       const radarr = services.find(s => s.type === ServiceType.RADARR);
       const tmdb = services.find(s => s.type === ServiceType.TMDB);
+      const jellyfin = services.find(s => s.type === ServiceType.JELLYFIN);
       const ai = services.find(s => s.type === ServiceType.AI);
 
       if (sonarr) {
@@ -174,6 +180,14 @@ export class Settings implements OnInit {
         this.settingsForm.get('tmdb')?.patchValue({
           id: tmdb.id || null,
           apiKey: tmdb.apiKey
+        });
+      }
+
+      if (jellyfin) {
+        this.settingsForm.get('jellyfin')?.patchValue({
+          id: jellyfin.id || null,
+          url: jellyfin.url,
+          apiKey: jellyfin.apiKey
         });
       }
 
@@ -239,6 +253,7 @@ export class Settings implements OnInit {
     const sonarrVal = this.settingsForm.get('sonarr')?.value;
     const radarrVal = this.settingsForm.get('radarr')?.value;
     const tmdbVal = this.settingsForm.get('tmdb')?.value;
+    const jellyfinVal = this.settingsForm.get('jellyfin')?.value;
     const aiVal = this.settingsForm.get('ai')?.value;
 
     const requests = [];
@@ -283,6 +298,21 @@ export class Settings implements OnInit {
       };
       if (tmdbVal.id) {
         requests.push(this.servicesService.updateService(tmdbVal.id, payload));
+      } else {
+        requests.push(this.servicesService.createService(payload));
+      }
+    }
+
+    // Jellyfin Save
+    if (jellyfinVal?.url && jellyfinVal?.apiKey) {
+      const payload: ServiceConfig = {
+        name: 'Jellyfin',
+        type: ServiceType.JELLYFIN,
+        url: jellyfinVal.url,
+        apiKey: jellyfinVal.apiKey
+      };
+      if (jellyfinVal.id) {
+        requests.push(this.servicesService.updateService(jellyfinVal.id, payload));
       } else {
         requests.push(this.servicesService.createService(payload));
       }
