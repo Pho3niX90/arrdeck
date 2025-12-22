@@ -11,6 +11,7 @@ export enum ServiceType {
   TRAKT = 'trakt',
   TVDB = 'tvdb',
   TMDB = 'tmdb',
+  JELLYFIN = 'jellyfin',
   AI = 'ai',
   OTHER = 'other',
 }
