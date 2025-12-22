@@ -7,9 +7,9 @@
 
       <!-- Status Indicator Bar -->
       <div class="absolute left-0 top-0 bottom-0 w-1" [ngClass]="{
-                     'bg-amber-500': item.status === 'warning' || item.errorMessage,
-                     'bg-yellow-500': item.status === 'paused',
-                     'bg-blue-500': item.status === 'downloading' || item.status === 'queued'
+                     'bg-amber-500': item.status.toLowerCase() === 'warning' || item.errorMessage,
+                     'bg-yellow-500': item.status.toLowerCase() === 'paused',
+                     'bg-blue-500': item.status.toLowerCase() === 'downloading' || item.status.toLowerCase() === 'queued'
                    }">
       </div>
 
@@ -20,10 +20,10 @@
             </h4>
             <div class="flex items-center gap-2 mt-1">
               <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded" [ngClass]="{
-                                    'bg-amber-500/10 text-amber-400': item.status === 'warning' || item.errorMessage,
-                                    'bg-yellow-500/10 text-yellow-400': item.status === 'paused',
-                                    'bg-blue-500/10 text-blue-400': item.status === 'downloading',
-                                    'bg-slate-500/10 text-slate-400': item.status === 'queued' || item.status === 'completed'
+                                    'bg-amber-500/10 text-amber-400': item.status.toLowerCase() === 'warning' || item.errorMessage,
+                                    'bg-yellow-500/10 text-yellow-400': item.status.toLowerCase() === 'paused',
+                                    'bg-blue-500/10 text-blue-400': item.status.toLowerCase() === 'downloading',
+                                    'bg-slate-500/10 text-slate-400': item.status.toLowerCase() === 'queued' || item.status.toLowerCase() === 'completed'
                                 }">
                 {{ item.status }}
               </span>
@@ -42,13 +42,13 @@
         <!-- Progress Bar -->
         <div class="w-full bg-slate-700/50 rounded-full h-1.5 overflow-hidden mt-2">
           <div class="h-1.5 rounded-full transition-all duration-500 relative overflow-hidden" [ngClass]="{
-                          'bg-amber-500': item.status === 'warning' || item.errorMessage,
-                          'bg-yellow-500': item.status === 'paused',
-                          'bg-blue-500': item.status === 'downloading' || item.status === 'queued',
-                          'bg-green-500': item.status === 'completed'
+                          'bg-amber-500': item.status.toLowerCase() === 'warning' || item.errorMessage,
+                          'bg-yellow-500': item.status.toLowerCase() === 'paused',
+                          'bg-blue-500': item.status.toLowerCase() === 'downloading' || item.status.toLowerCase() === 'queued',
+                          'bg-green-500': item.status.toLowerCase() === 'completed'
                         }" [style.width.%]="getProgress(item)">
             <!-- Shimmer Effect for Downloading -->
-            @if (item.status === 'downloading') {
+            @if (item.status.toLowerCase() === 'downloading') {
             <div class="absolute inset-0 bg-green-500/20 animate-[shimmer_2s_infinite]"></div>
             }
           </div>

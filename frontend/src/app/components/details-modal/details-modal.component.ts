@@ -1,5 +1,6 @@
 import { Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, signal, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { take } from 'rxjs';
 import { TmdbService } from '../../integrations/tmdb/tmdb.service';
 import { ServicesService, ServiceType } from '../../services/services';
 import { AddMediaModalComponent } from '../add-media-modal/add-media-modal.component';
@@ -319,7 +320,7 @@ export class DetailsModalComponent implements OnInit, OnChanges {
     this.checkingJellyfin.set(true);
     // Simple search query: title
     // We can refine later
-    this.jellyfinService.search(this.jellyfinUrl()!, this.jellyfinApiKey, title).subscribe({
+    this.jellyfinService.search(this.jellyfinUrl()!, this.jellyfinApiKey, title).pipe(take(1)).subscribe({
       next: (items) => {
         // Try to find exact match
         const match = items.find(i => {
