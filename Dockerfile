@@ -29,6 +29,7 @@ WORKDIR /app
 COPY --from=backend-build /app/backend/dist ./dist
 COPY --from=backend-build /app/backend/node_modules ./node_modules
 COPY --from=backend-build /app/backend/package.json ./package.json
+COPY --from=backend-build /app/backend/migrations ./migrations
 
 # Copy frontend built files to a static directory in backend
 # Assuming output is dist/ArrDeck/browser based on application builder defaults
