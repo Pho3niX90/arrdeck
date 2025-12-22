@@ -1,7 +1,7 @@
-import {Routes} from '@angular/router';
-import {Login} from './pages/login/login';
-import {Layout} from './components/layout/layout';
-import {authGuard} from './auth.guard';
+import { Routes } from '@angular/router';
+import { Login } from './pages/login/login';
+import { Layout } from './components/layout/layout';
+import { authGuard } from './auth.guard';
 
 export const routes: Routes = [
   {
@@ -22,6 +22,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/services/services').then(m => m.Services)
       },
       {
+        path: 'library',
+        loadComponent: () => import('./pages/library/library').then(m => m.LibraryPage)
+      },
+      {
         path: 'calendar',
         loadComponent: () => import('./pages/calendar/calendar').then(m => m.Calendar)
       },
@@ -35,5 +39,5 @@ export const routes: Routes = [
       }
     ]
   },
-  {path: '**', redirectTo: ''}
+  { path: '**', redirectTo: '' }
 ];
