@@ -79,7 +79,7 @@ export class AiService {
                 provider: isOllama ? 'ollama' : 'gemini',
                 apiKey: aiService.apiKey,
                 url: aiService.url || (isOllama ? 'http://localhost:11434' : null),
-                model: aiService.model || (isOllama ? 'llama3' : 'gemini-1.5-flash'),
+                model: aiService.model || (isOllama ? 'llama3' : 'gemini-2.5-flash'),
             };
         }
 
@@ -461,7 +461,7 @@ export class AiService {
             };
 
             const model = genAI.getGenerativeModel({
-                model: config.model || 'gemini-1.5-flash',
+                model: config.model || 'gemini-2.5-flash',
                 // @ts-ignore
                 tools: [tools],
             });
