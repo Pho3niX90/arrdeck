@@ -1,15 +1,15 @@
-import {Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, signal, SimpleChanges} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {TmdbService} from '../../integrations/tmdb/tmdb.service';
-import {ServicesService, ServiceType} from '../../services/services';
-import {AddMediaModalComponent} from '../add-media-modal/add-media-modal.component';
-import {MetadataService, NormalizedDetails} from '../../services/metadata.service';
-import {LibraryService, LibraryStatus} from '../../services/library.service';
-import {MessageService} from '../../services/message.service';
-import {TmdbCollection, TmdbCredits, TmdbItem} from '../../integrations/tmdb/tmdb.models';
-import {JellyfinService} from '../../integrations/jellyfin/jellyfin.service';
+import { Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, signal, SimpleChanges } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TmdbService } from '../../integrations/tmdb/tmdb.service';
+import { ServicesService, ServiceType } from '../../services/services';
+import { AddMediaModalComponent } from '../add-media-modal/add-media-modal.component';
+import { MetadataService, NormalizedDetails } from '../../services/metadata.service';
+import { LibraryService, LibraryStatus } from '../../services/library.service';
+import { MessageService } from '../../services/message.service';
+import { TmdbCollection, TmdbCredits, TmdbItem } from '../../integrations/tmdb/tmdb.models';
+import { JellyfinService } from '../../integrations/jellyfin/jellyfin.service';
 
-import {TmdbImagePipe} from '../../pipes/tmdb-image.pipe';
+import { TmdbImagePipe } from '../../pipes/tmdb-image.pipe';
 
 @Component({
   selector: 'app-details-modal',
@@ -66,7 +66,7 @@ export class DetailsModalComponent implements OnInit, OnChanges {
   private tmdbServiceId?: number;
 
   ngOnInit() {
-    this.libraryService.ensureLibraryCache();
+    this.libraryService.ensureLibraryCache().subscribe();
     this.servicesService.getServices().subscribe(services => {
       const tmdb = services.find(s => s.type === ServiceType.TMDB);
       if (tmdb) this.tmdbServiceId = tmdb.id;
@@ -191,7 +191,7 @@ export class DetailsModalComponent implements OnInit, OnChanges {
   fetchCollectionDetails(collectionId: number) {
     if (!this.tmdbServiceId) return;
     this.tmdbService.getCollection(this.tmdbServiceId, collectionId).subscribe(data => {
-      const tmdbData: any = {...data, tmdbId: data.id};
+      const tmdbData: any = { ...data, tmdbId: data.id };
       delete tmdbData.id;
 
       if (tmdbData.parts) {
@@ -262,7 +262,7 @@ export class DetailsModalComponent implements OnInit, OnChanges {
         if (status.inLibrary) this.inLibrary.set(true);
         if (status.collectionTmdbId) this.fetchCollectionDetails(status.collectionTmdbId);
         if (status.images) {
-          this.details.update(d => d ? ({...d, images: status.images}) : null);
+          this.details.update(d => d ? ({ ...d, images: status.images }) : null);
         }
         if (status.sonarrEpisodes) {
           this.sonarrEpisodes.set(status.sonarrEpisodes);
@@ -304,7 +304,7 @@ export class DetailsModalComponent implements OnInit, OnChanges {
     this.libraryService.addCollection(col, config).subscribe({
       next: () => {
         this.messageService.show('Collection movies added to Radarr queue', 'success');
-        this.collectionInfo.update(c => c ? {...c, monitored: true} : null);
+        this.collectionInfo.update(c => c ? { ...c, monitored: true } : null);
         this.fetchCollectionDetails(col.tmdbId!); // Refresh to show In Library status
       },
       error: (err) => {

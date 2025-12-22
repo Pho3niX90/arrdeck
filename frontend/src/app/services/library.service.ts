@@ -1,9 +1,9 @@
-import { inject, Injectable } from '@angular/core';
-import { firstValueFrom, forkJoin, map, Observable, of, shareReplay, switchMap } from 'rxjs';
-import { ServicesService, ServiceType } from './services';
-import { RadarrService } from '../integrations/radarr/radarr.service';
-import { SonarrService } from '../integrations/sonarr/sonarr.service';
-import { TmdbCollection } from '../integrations/tmdb/tmdb.models';
+import {inject, Injectable} from '@angular/core';
+import {forkJoin, map, Observable, of, shareReplay, switchMap} from 'rxjs';
+import {ServicesService, ServiceType} from './services';
+import {RadarrService} from '../integrations/radarr/radarr.service';
+import {SonarrService} from '../integrations/sonarr/sonarr.service';
+import {TmdbCollection} from '../integrations/tmdb/tmdb.models';
 
 export interface LibraryStatus {
   inLibrary: boolean;
@@ -40,7 +40,7 @@ export class LibraryService {
   private sonarrService = inject(SonarrService);
 
   private movieCache = new Set<number>();
-  private cacheInitialized = false;
+  private cacheInitialization$: Observable<void> | null = null;
 
   // Cache for the unified library to avoid re-fetching on every widget
   private libraryCache$: Observable<LibraryItem[]> | null = null;
@@ -138,21 +138,27 @@ export class LibraryService {
     return forkJoin(observables);
   }
 
-  async ensureLibraryCache() {
-    if (this.cacheInitialized) return;
-
-    const services = await firstValueFrom(this.servicesService.getServices());
-    const radarr = services.find(s => s.type === ServiceType.RADARR);
-    if (radarr) {
-      this.radarrService.getMovies(radarr.id!).subscribe({
-        next: (movies) => {
-          this.movieCache.clear();
-          movies.forEach(m => this.movieCache.add(m.tmdbId));
-          this.cacheInitialized = true;
-        },
-        error: (e) => console.error('Failed to load Radarr cache', e)
-      });
+  ensureLibraryCache(): Observable<void> {
+    if (this.cacheInitialization$) {
+      return this.cacheInitialization$;
     }
+
+    this.cacheInitialization$ = this.servicesService.getServices().pipe(
+      switchMap(services => {
+        const radarr = services.find(s => s.type === ServiceType.RADARR);
+        if (!radarr) return of(undefined);
+        return this.radarrService.getMovies(radarr.id!);
+      }),
+      map(movies => {
+        if (movies) {
+          this.movieCache.clear();
+          movies.forEach((m: any) => this.movieCache.add(m.tmdbId));
+        }
+      }),
+      shareReplay(1)
+    );
+
+    return this.cacheInitialization$;
   }
 
   isMovieInLibrary(tmdbId: number): boolean {
