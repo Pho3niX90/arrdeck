@@ -1,23 +1,24 @@
-import { AfterViewInit, Component, computed, ElementRef, inject, Input, NgZone, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { TraktService } from '../trakt.service';
-import { TraktShow } from '../trakt.models';
-import { WidgetCardComponent } from '../../../components/widget-card/widget-card.component';
-import { DetailsModalComponent } from '../../../components/details-modal/details-modal.component';
-import { SonarrService } from '../../sonarr/sonarr.service';
-import { ServicesService, ServiceType } from '../../../services/services';
-import { MediaCarouselComponent } from '../../../shared/components/media-carousel/media-carousel.component';
-import { MediaItem } from '../../../shared/models/media-item.model';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {TraktService} from '../trakt.service';
+import {TraktShow} from '../trakt.models';
+import {WidgetCardComponent} from '../../../components/widget-card/widget-card.component';
+import {DetailsModalComponent} from '../../../components/details-modal/details-modal.component';
+import {SonarrService} from '../../sonarr/sonarr.service';
+import {ServicesService, ServiceType} from '../../../services/services';
+import {MediaCarouselComponent} from '../../../shared/components/media-carousel/media-carousel.component';
+import {MediaItem} from '../../../shared/models/media-item.model';
+
+import {WidgetBase} from '../../../shared/base/widget-base';
 
 @Component({
   selector: 'app-trakt-recommended-shows',
   standalone: true,
-  imports: [CommonModule, WidgetCardComponent, DetailsModalComponent, MediaCarouselComponent],
+  imports: [CommonModule, DetailsModalComponent, MediaCarouselComponent, WidgetCardComponent],
   templateUrl: './trakt-recommended-shows.component.html',
   styles: ``
 })
-export class TraktRecommendedShowsComponent implements OnInit {
-  @Input({ required: true }) serviceId!: number;
+export class TraktRecommendedShowsComponent extends WidgetBase implements OnInit {
 
   private traktService = inject(TraktService);
   private servicesService = inject(ServicesService);
@@ -36,7 +37,7 @@ export class TraktRecommendedShowsComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.traktService.getRecommendedShows(this.serviceId).subscribe(shows => {
+    this.traktService.getRecommendedShows(this.serviceId()).subscribe(shows => {
       this.shows.set(shows);
       this.checkLibrary();
     });

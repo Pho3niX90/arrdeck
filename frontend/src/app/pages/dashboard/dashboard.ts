@@ -230,16 +230,27 @@ export class Dashboard implements OnInit {
         this.dashboardService.addWidget({
           type: 'sonarr-calendar',
           serviceId: sId,
+          serviceType: 'sonarr',
           cols: 1,
           rows: 1,
           x: 0,
           y: y,
           title: 'Calendar'
         });
-        this.dashboardService.addWidget({type: 'queue', serviceId: sId, cols: 1, rows: 1, x: 1, y: y, title: 'Queue'});
+        this.dashboardService.addWidget({
+          type: 'queue',
+          serviceId: sId,
+          serviceType: 'sonarr',
+          cols: 1,
+          rows: 1,
+          x: 1,
+          y: y,
+          title: 'Queue'
+        });
         this.dashboardService.addWidget({
           type: 'sonarr-recent',
           serviceId: sId,
+          serviceType: 'sonarr',
           cols: 1,
           rows: 1,
           x: 2,
@@ -250,6 +261,7 @@ export class Dashboard implements OnInit {
         this.dashboardService.addWidget({
           type: 'ai-recommendations',
           serviceId: sId,
+          serviceType: 'sonarr',
           cols: 1,
           rows: 1,
           x: 0,
@@ -261,16 +273,27 @@ export class Dashboard implements OnInit {
         this.dashboardService.addWidget({
           type: 'radarr-recommended',
           serviceId: sId,
+          serviceType: 'radarr',
           cols: 1,
           rows: 1,
           x: 0,
           y: y,
           title: 'Recommended'
         });
-        this.dashboardService.addWidget({type: 'queue', serviceId: sId, cols: 1, rows: 1, x: 1, y: y, title: 'Queue'});
+        this.dashboardService.addWidget({
+          type: 'queue',
+          serviceId: sId,
+          serviceType: 'radarr',
+          cols: 1,
+          rows: 1,
+          x: 1,
+          y: y,
+          title: 'Queue'
+        });
         this.dashboardService.addWidget({
           type: 'radarr-recent',
           serviceId: sId,
+          serviceType: 'radarr',
           cols: 1,
           rows: 1,
           x: 2,
@@ -281,6 +304,7 @@ export class Dashboard implements OnInit {
         this.dashboardService.addWidget({
           type: 'ai-recommendations',
           serviceId: sId,
+          serviceType: 'radarr',
           cols: 1,
           rows: 1,
           x: 0,

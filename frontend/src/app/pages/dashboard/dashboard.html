@@ -8,8 +8,7 @@
       @if (!dashboardService.editMode()) {
         <button (click)="dashboardService.toggleEditMode()"
                 class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-               stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
           </svg>
@@ -18,8 +17,7 @@
       } @else {
         <button (click)="dashboardService.toggleEditMode()"
                 class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-               stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
           </svg>
           Done Editing
@@ -38,85 +36,97 @@
     </div>
   }
 
-  <!-- Widgets Grid -->
-  <div class="flex-1 relative min-h-125">
-    <gridster [options]="options" class="bg-transparent" (dragover)="onDragOver($event)"
-              (drop)="onNativeDrop($event)">
-      @for (item of dashboardService.widgets(); track item.id) {
-        <gridster-item [item]="item" class="relative group">
-          <!-- Delete Button (Only in edit mode) -->
-          @if (dashboardService.editMode()) {
-            <div class="widget-actions">
-              <button (click)="dashboardService.removeWidget(item.id)" (mousedown)="$event.stopPropagation()"
-                      (touchstart)="$event.stopPropagation()"
-                      class="p-1 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-lg cursor-pointer pointer-events-auto">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              </button>
-            </div>
-          }
-
-          <!-- Widget Content -->
-          <div class="h-full w-full overflow-hidden">
-            @switch (item.type) {
-              @case ('sonarr-calendar') {
-                <app-sonarr-calendar [serviceId]="$any(item.serviceId!)" class="h-full block"></app-sonarr-calendar>
-              }
-              @case ('sonarr-recent') {
-                <app-sonarr-recent [serviceId]="$any(item.serviceId!)" class="h-full block"></app-sonarr-recent>
-              }
-              @case ('queue') {
-                <app-queue-widget [serviceId]="$any(item.serviceId!)"
-                                  [type]="item.serviceId === 'sonarr' ? 'sonarr' : 'radarr'"
-                                  class="h-full block"></app-queue-widget>
-              }
-              @case ('ai-recommendations') {
-                <app-ai-recommendations-widget [serviceId]="$any(item.serviceId!)"
-                                               [type]="item.serviceId === 'sonarr' ? 'sonarr' : 'radarr'"
-                                               class="h-full block"></app-ai-recommendations-widget>
-              }
-              @case ('radarr-recent') {
-                <app-radarr-recent [serviceId]="$any(item.serviceId!)" class="h-full block"></app-radarr-recent>
-              }
-              @case ('radarr-recommended') {
-                <app-radarr-recommended [serviceId]="$any(item.serviceId!)"
-                                        class="h-full block"></app-radarr-recommended>
-              }
-              @case ('trakt-trending-movies') {
-                <app-trakt-trending-movies [serviceId]="$any(item.serviceId!)"
-                                           class="h-full block"></app-trakt-trending-movies>
-              }
-              @case ('trakt-trending-shows') {
-                <app-trakt-trending-shows [serviceId]="$any(item.serviceId!)"
-                                          class="h-full block"></app-trakt-trending-shows>
-              }
-              @case ('unified-recommendations-movie') {
-                <app-unified-recommendations type="movie" class="h-full block"></app-unified-recommendations>
-              }
-              @case ('unified-recommendations-show') {
-                <app-unified-recommendations type="show" class="h-full block"></app-unified-recommendations>
-              }
-              @case ('smart-collection') {
-                <app-smart-collection-widget [title]="item.title!" [type]="$any(item.serviceId!)"
-                                             [icon]="item.icon!" class="h-full block"></app-smart-collection-widget>
-              }
-              @default {
-                <div class="h-full flex items-center justify-center bg-slate-800 text-slate-400">
-                  Unknown Widget: {{ item.type }}
-                </div>
-              }
+  <!-- Widgets Grid & Store Container -->
+  <div class="flex-1 relative min-h-0 flex overflow-hidden">
+    <!-- Grid Area -->
+    <div class="flex-1 relative min-h-0 overflow-hidden">
+      <gridster [options]="options" class="bg-transparent h-full" (dragover)="onDragOver($event)"
+                (drop)="onNativeDrop($event)">
+        @for (item of dashboardService.widgets(); track item.id) {
+          <gridster-item [item]="item" class="relative group">
+            <!-- Delete Button (Only in edit mode) -->
+            @if (dashboardService.editMode()) {
+              <div class="widget-actions">
+                <button (click)="dashboardService.removeWidget(item.id)" (mousedown)="$event.stopPropagation()"
+                        (touchstart)="$event.stopPropagation()"
+                        class="p-1 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-lg cursor-pointer pointer-events-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                       stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
             }
-          </div>
-        </gridster-item>
-      }
-    </gridster>
-  </div>
 
-  <!-- Widget Store Sidebar -->
-  @if (dashboardService.editMode()) {
-    <app-widget-store></app-widget-store>
-  }
+            <!-- Widget Content -->
+            <div class="h-full w-full overflow-hidden">
+              @switch (item.type) {
+                @case ('sonarr-calendar') {
+                  <app-sonarr-calendar [serviceId]="$any(item.serviceId!)" class="h-full block"></app-sonarr-calendar>
+                }
+                @case ('sonarr-recent') {
+                  <app-sonarr-recent [serviceId]="$any(item.serviceId!)" [rows]="item.rows || 1" [cols]="item.cols || 1"
+                                     class="h-full block"></app-sonarr-recent>
+                }
+                @case ('queue') {
+                  <app-queue-widget [serviceId]="$any(item.serviceId!)"
+                                    [type]="item.serviceType === 'sonarr' ? 'sonarr' : 'radarr'"
+                                    class="h-full block"></app-queue-widget>
+                }
+                @case ('ai-recommendations') {
+                  <app-ai-recommendations-widget [serviceId]="$any(item.serviceId!)"
+                                                 [type]="item.serviceType === 'sonarr' ? 'sonarr' : 'radarr'"
+                                                 [rows]="item.rows || 1"
+                                                 [cols]="item.cols || 1"
+                                                 class="h-full block"></app-ai-recommendations-widget>
+                }
+                @case ('radarr-recent') {
+                  <app-radarr-recent [serviceId]="$any(item.serviceId!)" [rows]="item.rows || 1" [cols]="item.cols || 1"
+                                     class="h-full block"></app-radarr-recent>
+                }
+                @case ('radarr-recommended') {
+                  <app-radarr-recommended [serviceId]="$any(item.serviceId!)"
+                                          class="h-full block"></app-radarr-recommended>
+                }
+                @case ('trakt-trending-movies') {
+                  <app-trakt-trending-movies [serviceId]="$any(item.serviceId!)" [rows]="item.rows || 1"
+                                             [cols]="item.cols || 1" class="h-full block"></app-trakt-trending-movies>
+                }
+                @case ('trakt-trending-shows') {
+                  <app-trakt-trending-shows [serviceId]="$any(item.serviceId!)" [rows]="item.rows || 1"
+                                            [cols]="item.cols || 1" class="h-full block"></app-trakt-trending-shows>
+                }
+                @case ('unified-recommendations-movie') {
+                  <app-unified-recommendations type="movie" class="h-full block" [serviceId]="$any(item.serviceId!)"
+                                               [rows]="item.rows || 1"
+                                               [cols]="item.cols || 1"></app-unified-recommendations>
+                }
+                @case ('unified-recommendations-show') {
+                  <app-unified-recommendations type="show" class="h-full block" [serviceId]="$any(item.serviceId!)"
+                                               [rows]="item.rows || 1"
+                                               [cols]="item.cols || 1"></app-unified-recommendations>
+                }
+                @case ('smart-collection') {
+                  <app-smart-collection-widget [title]="item.title!" [type]="$any(item.serviceId!)" [icon]="item.icon!"
+                                               class="h-full block" [serviceId]="$any(item.serviceId!)"
+                                               [rows]="item.rows || 1"
+                                               [cols]="item.cols || 1"></app-smart-collection-widget>
+                }
+                @default {
+                  <div class="h-full flex items-center justify-center bg-slate-800 text-slate-400">
+                    Unknown Widget: {{ item.type }}
+                  </div>
+                }
+              }
+            </div>
+          </gridster-item>
+        }
+      </gridster>
+    </div>
+
+    <!-- Widget Store Sidebar -->
+    @if (dashboardService.editMode()) {
+      <app-widget-store></app-widget-store>
+    }
+  </div>
 </div>

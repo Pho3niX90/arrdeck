@@ -1,41 +1,36 @@
-import {Component, computed, inject, input, OnInit, signal, ViewChild} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {LibraryItem, LibraryService} from '../../services/library.service';
-import {DetailsModalComponent} from '../details-modal/details-modal.component';
-import {WidgetCardComponent} from '../widget-card/widget-card.component';
-import {MediaCarouselComponent} from '../../shared/components/media-carousel/media-carousel.component';
-import {MediaItem} from '../../shared/models/media-item.model';
+import { Component, computed, inject, input, OnInit, signal, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LibraryItem, LibraryService } from '../../services/library.service';
+import { DetailsModalComponent } from '../details-modal/details-modal.component';
+import { MediaItem } from '../../shared/models/media-item.model';
+import { WidgetBase } from '../../shared/base/widget-base';
+import { HorizontalCardComponent } from '../../shared/components/horizontal-card/horizontal-card.component';
 
 @Component({
   selector: 'app-smart-collection-widget',
   standalone: true,
-  imports: [CommonModule, WidgetCardComponent, MediaCarouselComponent, DetailsModalComponent],
+  imports: [CommonModule, HorizontalCardComponent, DetailsModalComponent],
   template: `
-    <app-widget-card [title]="title()" [subtitle]="'Suggests ' + items().length" accentColor="text-amber-400">
-      <div header-icon class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center">
+    <app-horizontal-card
+      [title]="title()"
+      [subtitle]="'Suggests ' + items().length"
+      accentColor="text-amber-400"
+      baseColor="amber"
+      [items]="mediaItems()"
+      [rows]="rows()"
+      [loading]="loading()">
+
+      <div header-icon>
         @if (icon()) {
           <span class="text-xs">{{ icon() }}</span>
         }
       </div>
 
-      @if (loading()) {
-        <div class="flex gap-4 p-4 overflow-hidden">
-          @for (i of [1, 2, 3, 4]; track i) {
-            <div class="w-32 aspect-2/3 bg-slate-800/50 rounded-lg animate-pulse shrink-0"></div>
-          }
-        </div>
-      } @else if (items().length === 0) {
-        <div class="h-full flex flex-col items-center justify-center text-slate-500 text-sm p-4">
-          <p>No matches found.</p>
-        </div>
-      } @else {
-        <app-media-carousel [items]="mediaItems()"/>
-      }
       <app-details-modal></app-details-modal>
-    </app-widget-card>
+    </app-horizontal-card>
   `
 })
-export class SmartCollectionWidget implements OnInit {
+export class SmartCollectionWidget extends WidgetBase implements OnInit {
   title = input.required<string>();
   type = input.required<'underrated' | 'marathon' | 'quick'>();
   icon = input<string>();

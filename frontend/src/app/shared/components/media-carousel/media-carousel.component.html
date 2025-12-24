@@ -1,8 +1,11 @@
-<div #scrollContainer class="flex-1 overflow-x-auto p-4 flex gap-4 min-h-0 scrollbar-hide items-start h-full"
-    appHorizontalScroll (mouseenter)="pause()" (mouseleave)="resume()" (touchstart)="pause()" (touchend)="resume()">
+<div #scrollContainer class="flex-1 p-4 flex gap-4 min-h-0 h-full" [class.overflow-x-auto]="rows() === 1"
+     [class.scrollbar-hide]="rows() === 1" [class.items-start]="rows() === 1" [class.flex-nowrap]="rows() === 1"
+     [class.flex-wrap]="rows() > 1" [class.overflow-y-auto]="rows() > 1" [class.content-start]="rows() > 1"
+     (mouseenter)="pause()" (mouseleave)="resume()" (touchstart)="pause()"
+     (touchend)="resume()">
 
-    @for (item of items(); track item.id) {
+  @for (item of items(); track item.id) {
     <app-media-card [item]="item"></app-media-card>
-    }
+  }
 
 </div>

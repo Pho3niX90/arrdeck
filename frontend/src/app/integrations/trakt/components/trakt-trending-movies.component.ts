@@ -1,23 +1,23 @@
-import { Component, Input, OnInit, inject, signal, computed, ViewChild, AfterViewInit, OnDestroy, ElementRef, NgZone } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { TraktService } from '../trakt.service';
-import { TraktTrendingItem, TraktMovie } from '../trakt.models';
-import { WidgetCardComponent } from '../../../components/widget-card/widget-card.component';
-import { DetailsModalComponent } from '../../../components/details-modal/details-modal.component';
-import { RadarrService } from '../../radarr/radarr.service';
-import { ServicesService } from '../../../services/services';
-import { MediaCarouselComponent } from '../../../shared/components/media-carousel/media-carousel.component';
-import { MediaItem } from '../../../shared/models/media-item.model';
+import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {TraktService} from '../trakt.service';
+import {TraktMovie, TraktTrendingItem} from '../trakt.models';
+import {DetailsModalComponent} from '../../../components/details-modal/details-modal.component';
+import {RadarrService} from '../../radarr/radarr.service';
+import {ServicesService} from '../../../services/services';
+import {MediaItem} from '../../../shared/models/media-item.model';
+
+import {WidgetBase} from '../../../shared/base/widget-base';
+import {HorizontalCardComponent} from '../../../shared/components/horizontal-card/horizontal-card.component';
 
 @Component({
   selector: 'app-trakt-trending-movies',
   standalone: true,
-  imports: [CommonModule, WidgetCardComponent, DetailsModalComponent, MediaCarouselComponent],
+  imports: [CommonModule, HorizontalCardComponent, DetailsModalComponent],
   templateUrl: './trakt-trending-movies.component.html',
   styles: ``
 })
-export class TraktTrendingMoviesComponent implements OnInit {
-  @Input({ required: true }) serviceId!: number;
+export class TraktTrendingMoviesComponent extends WidgetBase implements OnInit {
 
   @ViewChild(DetailsModalComponent) detailsModal!: DetailsModalComponent;
 
@@ -33,7 +33,7 @@ export class TraktTrendingMoviesComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.traktService.getTrendingMovies(this.serviceId).subscribe(data => {
+    this.traktService.getTrendingMovies(this.serviceId()).subscribe(data => {
       this.movies.set(data);
     });
 
@@ -100,7 +100,7 @@ export class TraktTrendingMoviesComponent implements OnInit {
   }
 
   openDetails(movie: TraktMovie) {
-    this.detailsModal.traktServiceId = this.serviceId;
+    this.detailsModal.traktServiceId = this.serviceId();
     this.detailsModal.type = 'movie';
     this.detailsModal.traktId = movie.ids.trakt;
     this.detailsModal.open();

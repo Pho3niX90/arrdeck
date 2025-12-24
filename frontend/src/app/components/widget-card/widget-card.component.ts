@@ -1,5 +1,5 @@
-import { Component, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, input} from '@angular/core';
+import {CommonModule} from '@angular/common';
 
 @Component({
   selector: 'app-widget-card',
@@ -10,6 +10,6 @@ import { CommonModule } from '@angular/common';
 })
 export class WidgetCardComponent {
   title = input.required<string>();
-  subtitle = input.required<string>();
+  subtitle = input.required<string | undefined>();
   accentColor = input<string>('text-blue-400');
 }

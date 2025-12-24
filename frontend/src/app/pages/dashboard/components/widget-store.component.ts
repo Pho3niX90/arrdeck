@@ -1,7 +1,7 @@
-import {Component, inject, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {DashboardService, DashboardWidget} from '../dashboard.service';
-import {ServiceConfig, ServicesService} from '../../../services/services';
+import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { DashboardService, DashboardWidget } from '../dashboard.service';
+import { ServiceConfig, ServicesService } from '../../../services/services';
 
 @Component({
   selector: 'app-widget-store',
@@ -9,7 +9,7 @@ import {ServiceConfig, ServicesService} from '../../../services/services';
   imports: [CommonModule],
   template: `
     <div
-      class="fixed inset-y-0 right-0 w-80 bg-slate-900 border-l border-slate-700 shadow-2xl p-6 overflow-y-auto transform transition-transform z-50">
+      class="w-80 h-full bg-slate-900 border-l border-slate-700 shadow-xl p-6 overflow-y-auto shrink-0">
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-bold text-white">Add Widget</h3>
         <button (click)="dashboardService.toggleEditMode()" class="text-slate-400 hover:text-white">
@@ -98,23 +98,23 @@ export class WidgetStoreComponent {
     switch (service.type) {
       case 'sonarr':
         return [
-          {type: 'sonarr-calendar', cols: 1, rows: 1, title: 'Calendar', icon: '📅'},
-          {type: 'sonarr-recent', cols: 1, rows: 1, title: 'Recent Releases', icon: '🆕'},
-          {type: 'queue', cols: 1, rows: 1, title: 'Queue', icon: '📥'},
-          {type: 'ai-recommendations', cols: 1, rows: 1, title: 'AI Recommendations', icon: '🤖'},
+          { type: 'sonarr-calendar', cols: 1, rows: 1, title: 'Calendar', icon: '📅', serviceType: 'sonarr' },
+          { type: 'sonarr-recent', cols: 1, rows: 1, title: 'Recent Releases', icon: '🆕', serviceType: 'sonarr' },
+          { type: 'queue', cols: 1, rows: 1, title: 'Queue', icon: '📥', serviceType: 'sonarr' },
+          { type: 'ai-recommendations', cols: 1, rows: 1, title: 'AI Recommendations', icon: '🤖', serviceType: 'sonarr' },
         ];
       case 'radarr':
         return [
-          {type: 'radarr-recent', cols: 1, rows: 1, title: 'Recent Movies', icon: '🎬'},
-          {type: 'radarr-recommended', cols: 1, rows: 1, title: 'Recommended', icon: '👍'},
-          {type: 'queue', cols: 1, rows: 1, title: 'Queue', icon: '📥'},
-          {type: 'ai-recommendations', cols: 1, rows: 1, title: 'AI Recommendations', icon: '🤖'},
+          { type: 'radarr-recent', cols: 1, rows: 1, title: 'Recent Movies', icon: '🎬', serviceType: 'radarr' },
+          { type: 'radarr-recommended', cols: 1, rows: 1, title: 'Recommended', icon: '👍', serviceType: 'radarr' },
+          { type: 'queue', cols: 1, rows: 1, title: 'Queue', icon: '📥', serviceType: 'radarr' },
+          { type: 'ai-recommendations', cols: 1, rows: 1, title: 'AI Recommendations', icon: '🤖', serviceType: 'radarr' },
         ];
       case 'trakt':
         return [
-          {type: 'trakt-trending-movies', cols: 1, rows: 1, title: 'Trending Movies', icon: '🔥'},
-          {type: 'trakt-trending-shows', cols: 1, rows: 1, title: 'Trending Shows', icon: '📺'},
-          {type: 'unified-recommendations', cols: 1, rows: 1, title: 'Recommended Movies', icon: '🎥'}, // Needs type distinguishing
+          { type: 'trakt-trending-movies', cols: 1, rows: 1, title: 'Trending Movies', icon: '🔥' },
+          { type: 'trakt-trending-shows', cols: 1, rows: 1, title: 'Trending Shows', icon: '📺' },
+          { type: 'unified-recommendations', cols: 1, rows: 1, title: 'Recommended Movies', icon: '🎥' }, // Needs type distinguishing
           // Note: unified-recommendations handles both movie/show via input, need to handle that in widget config
         ];
       default:
@@ -124,20 +124,20 @@ export class WidgetStoreComponent {
 
   addWidget(widget: Omit<DashboardWidget, 'id' | 'x' | 'y' | 'serviceId'>, serviceId?: string) {
     if (widget.type === 'unified-recommendations') {
-      this.dashboardService.addWidget({...widget, serviceId, type: 'unified-recommendations-movie'});
+      this.dashboardService.addWidget({ ...widget, serviceId, type: 'unified-recommendations-movie' });
       return;
     }
-    this.dashboardService.addWidget({...widget, serviceId});
+    this.dashboardService.addWidget({ ...widget, serviceId });
   }
 
   onDragStart(event: DragEvent, widget: Omit<DashboardWidget, 'id' | 'x' | 'y' | 'serviceId'>, serviceId?: string) {
     if (widget.type === 'unified-recommendations') {
-      const unifiedWidget = {...widget, serviceId, type: 'unified-recommendations-movie'};
+      const unifiedWidget = { ...widget, serviceId, type: 'unified-recommendations-movie' };
       event.dataTransfer?.setData('arrdeck/widget', JSON.stringify(unifiedWidget));
       event.dataTransfer?.setData('text/plain', JSON.stringify(unifiedWidget));
     } else {
-      event.dataTransfer?.setData('arrdeck/widget', JSON.stringify({...widget, serviceId}));
-      event.dataTransfer?.setData('text/plain', JSON.stringify({...widget, serviceId}));
+      event.dataTransfer?.setData('arrdeck/widget', JSON.stringify({ ...widget, serviceId }));
+      event.dataTransfer?.setData('text/plain', JSON.stringify({ ...widget, serviceId }));
     }
     event.dataTransfer!.effectAllowed = 'copy';
   }
