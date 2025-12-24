@@ -1,12 +1,29 @@
 import {effect, inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
+import {ServiceType} from '../../services/services';
 import {AuthService} from '../../services/auth';
+
+export enum WidgetType {
+  SONARR_CALENDAR = 'sonarr-calendar',
+  SONARR_RECENT = 'sonarr-recent',
+  QUEUE = 'queue',
+  AI_RECOMMENDATIONS = 'ai-recommendations',
+  RADARR_RECENT = 'radarr-recent',
+  RADARR_RECOMMENDED = 'radarr-recommended',
+  TRAKT_TRENDING_MOVIES = 'trakt-trending-movies',
+  TRAKT_TRENDING_SHOWS = 'trakt-trending-shows',
+  UNIFIED_RECOMMENDATIONS = 'unified-recommendations',
+  UNIFIED_RECOMMENDATIONS_MOVIE = 'unified-recommendations-movie',
+  UNIFIED_RECOMMENDATIONS_SHOW = 'unified-recommendations-show',
+  SMART_COLLECTION = 'smart-collection',
+  UNKNOWN = 'unknown'
+}
 
 export interface DashboardWidget {
   id: string; // unique UUID
-  type: string; // e.g., 'sonarr-calendar', 'radarr-recent'
+  type: WidgetType; // e.g., 'sonarr-calendar', 'radarr-recent'
   serviceId?: number | string; // number for services, string for generic types
-  serviceType?: string;
+  serviceType?: ServiceType | string;
   cols: number;
   rows: number;
   x: number;
@@ -71,7 +88,7 @@ export class DashboardService {
       y: 0,
       cols: 1,
       rows: 1,
-      type: 'unknown',
+      type: WidgetType.UNKNOWN,
       ...widget,
     };
 

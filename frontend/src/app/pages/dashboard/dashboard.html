@@ -61,52 +61,52 @@
             <!-- Widget Content -->
             <div class="h-full w-full overflow-hidden">
               @switch (item.type) {
-                @case ('sonarr-calendar') {
+                @case (WidgetType.SONARR_CALENDAR) {
                   <app-sonarr-calendar [serviceId]="$any(item.serviceId!)" class="h-full block"></app-sonarr-calendar>
                 }
-                @case ('sonarr-recent') {
+                @case (WidgetType.SONARR_RECENT) {
                   <app-sonarr-recent [serviceId]="$any(item.serviceId!)" [rows]="item.rows || 1" [cols]="item.cols || 1"
                                      class="h-full block"></app-sonarr-recent>
                 }
-                @case ('queue') {
+                @case (WidgetType.QUEUE) {
                   <app-queue-widget [serviceId]="$any(item.serviceId!)"
-                                    [type]="item.serviceType === 'sonarr' ? 'sonarr' : 'radarr'"
+                                    [type]="item.serviceType === ServiceType.SONARR ? 'sonarr' : 'radarr'"
                                     class="h-full block"></app-queue-widget>
                 }
-                @case ('ai-recommendations') {
+                @case (WidgetType.AI_RECOMMENDATIONS) {
                   <app-ai-recommendations-widget [serviceId]="$any(item.serviceId!)"
-                                                 [type]="item.serviceType === 'sonarr' ? 'sonarr' : 'radarr'"
+                                                 [type]="item.serviceType === ServiceType.SONARR ? 'sonarr' : 'radarr'"
                                                  [rows]="item.rows || 1"
                                                  [cols]="item.cols || 1"
                                                  class="h-full block"></app-ai-recommendations-widget>
                 }
-                @case ('radarr-recent') {
+                @case (WidgetType.RADARR_RECENT) {
                   <app-radarr-recent [serviceId]="$any(item.serviceId!)" [rows]="item.rows || 1" [cols]="item.cols || 1"
                                      class="h-full block"></app-radarr-recent>
                 }
-                @case ('radarr-recommended') {
+                @case (WidgetType.RADARR_RECOMMENDED) {
                   <app-radarr-recommended [serviceId]="$any(item.serviceId!)"
                                           class="h-full block"></app-radarr-recommended>
                 }
-                @case ('trakt-trending-movies') {
+                @case (WidgetType.TRAKT_TRENDING_MOVIES) {
                   <app-trakt-trending-movies [serviceId]="$any(item.serviceId!)" [rows]="item.rows || 1"
                                              [cols]="item.cols || 1" class="h-full block"></app-trakt-trending-movies>
                 }
-                @case ('trakt-trending-shows') {
+                @case (WidgetType.TRAKT_TRENDING_SHOWS) {
                   <app-trakt-trending-shows [serviceId]="$any(item.serviceId!)" [rows]="item.rows || 1"
                                             [cols]="item.cols || 1" class="h-full block"></app-trakt-trending-shows>
                 }
-                @case ('unified-recommendations-movie') {
+                @case (WidgetType.UNIFIED_RECOMMENDATIONS_MOVIE) {
                   <app-unified-recommendations type="movie" class="h-full block" [serviceId]="$any(item.serviceId!)"
                                                [rows]="item.rows || 1"
                                                [cols]="item.cols || 1"></app-unified-recommendations>
                 }
-                @case ('unified-recommendations-show') {
+                @case (WidgetType.UNIFIED_RECOMMENDATIONS_SHOW) {
                   <app-unified-recommendations type="show" class="h-full block" [serviceId]="$any(item.serviceId!)"
                                                [rows]="item.rows || 1"
                                                [cols]="item.cols || 1"></app-unified-recommendations>
                 }
-                @case ('smart-collection') {
+                @case (WidgetType.SMART_COLLECTION) {
                   <app-smart-collection-widget [title]="item.title!" [type]="$any(item.serviceId!)" [icon]="item.icon!"
                                                class="h-full block" [serviceId]="$any(item.serviceId!)"
                                                [rows]="item.rows || 1"

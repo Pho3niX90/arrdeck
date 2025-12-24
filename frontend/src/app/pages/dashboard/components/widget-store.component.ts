@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DashboardService, DashboardWidget } from '../dashboard.service';
-import { ServiceConfig, ServicesService } from '../../../services/services';
+import { DashboardService, DashboardWidget, WidgetType } from '../dashboard.service';
+import { ServiceConfig, ServicesService, ServiceType } from '../../../services/services';
 
 @Component({
   selector: 'app-widget-store',
@@ -48,7 +48,7 @@ import { ServiceConfig, ServicesService } from '../../../services/services';
           <div class="grid grid-cols-1 gap-3">
             <button (click)="addSmartWidget('Underrated Gems', 'underrated', '💎')"
                     draggable="true"
-                    (dragstart)="onDragStart($event, {type: 'smart-collection', title: 'Underrated Gems', icon: '💎', cols: 1, rows: 1}, 'underrated')"
+                    (dragstart)="onDragStart($event, {type: WidgetType.SMART_COLLECTION, title: 'Underrated Gems', icon: '💎', cols: 1, rows: 1}, 'underrated')"
                     class="flex items-center p-3 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors text-left group cursor-move">
               <span class="text-2xl mr-3">💎</span>
               <div>
@@ -58,7 +58,7 @@ import { ServiceConfig, ServicesService } from '../../../services/services';
             </button>
             <button (click)="addSmartWidget('Marathon Worthy', 'marathon', '🍿')"
                     draggable="true"
-                    (dragstart)="onDragStart($event, {type: 'smart-collection', title: 'Marathon Worthy', icon: '🍿', cols: 1, rows: 1}, 'marathon')"
+                    (dragstart)="onDragStart($event, {type: WidgetType.SMART_COLLECTION, title: 'Marathon Worthy', icon: '🍿', cols: 1, rows: 1}, 'marathon')"
                     class="flex items-center p-3 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors text-left group cursor-move">
               <span class="text-2xl mr-3">🍿</span>
               <div>
@@ -68,7 +68,7 @@ import { ServiceConfig, ServicesService } from '../../../services/services';
             </button>
             <button (click)="addSmartWidget('Quick Watch', 'quick', '⚡')"
                     draggable="true"
-                    (dragstart)="onDragStart($event, {type: 'smart-collection', title: 'Quick Watch', icon: '⚡', cols: 1, rows: 1}, 'quick')"
+                    (dragstart)="onDragStart($event, {type: WidgetType.SMART_COLLECTION, title: 'Quick Watch', icon: '⚡', cols: 1, rows: 1}, 'quick')"
                     class="flex items-center p-3 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors text-left group cursor-move">
               <span class="text-2xl mr-3">⚡</span>
               <div>
@@ -88,6 +88,10 @@ export class WidgetStoreComponent {
 
   availableServices = signal<ServiceConfig[]>([]);
 
+  // Expose Enums to template if needed, though mostly used in TS here
+  WidgetType = WidgetType;
+  ServiceType = ServiceType;
+
   constructor() {
     this.servicesService.getServices().subscribe(services => {
       this.availableServices.set(services);
@@ -96,26 +100,25 @@ export class WidgetStoreComponent {
 
   getWidgetsForService(service: ServiceConfig): Omit<DashboardWidget, 'id' | 'x' | 'y' | 'serviceId'>[] {
     switch (service.type) {
-      case 'sonarr':
+      case ServiceType.SONARR:
         return [
-          { type: 'sonarr-calendar', cols: 1, rows: 1, title: 'Calendar', icon: '📅', serviceType: 'sonarr' },
-          { type: 'sonarr-recent', cols: 1, rows: 1, title: 'Recent Releases', icon: '🆕', serviceType: 'sonarr' },
-          { type: 'queue', cols: 1, rows: 1, title: 'Queue', icon: '📥', serviceType: 'sonarr' },
-          { type: 'ai-recommendations', cols: 1, rows: 1, title: 'AI Recommendations', icon: '🤖', serviceType: 'sonarr' },
+          { type: WidgetType.SONARR_CALENDAR, cols: 1, rows: 1, title: 'Calendar', icon: '📅', serviceType: ServiceType.SONARR },
+          { type: WidgetType.SONARR_RECENT, cols: 1, rows: 1, title: 'Recent Releases', icon: '🆕', serviceType: ServiceType.SONARR },
+          { type: WidgetType.QUEUE, cols: 1, rows: 1, title: 'Queue', icon: '📥', serviceType: ServiceType.SONARR },
+          { type: WidgetType.AI_RECOMMENDATIONS, cols: 1, rows: 1, title: 'AI Recommendations', icon: '🤖', serviceType: ServiceType.SONARR },
         ];
-      case 'radarr':
+      case ServiceType.RADARR:
         return [
-          { type: 'radarr-recent', cols: 1, rows: 1, title: 'Recent Movies', icon: '🎬', serviceType: 'radarr' },
-          { type: 'radarr-recommended', cols: 1, rows: 1, title: 'Recommended', icon: '👍', serviceType: 'radarr' },
-          { type: 'queue', cols: 1, rows: 1, title: 'Queue', icon: '📥', serviceType: 'radarr' },
-          { type: 'ai-recommendations', cols: 1, rows: 1, title: 'AI Recommendations', icon: '🤖', serviceType: 'radarr' },
+          { type: WidgetType.RADARR_RECENT, cols: 1, rows: 1, title: 'Recent Movies', icon: '🎬', serviceType: ServiceType.RADARR },
+          { type: WidgetType.RADARR_RECOMMENDED, cols: 1, rows: 1, title: 'Recommended', icon: '👍', serviceType: ServiceType.RADARR },
+          { type: WidgetType.QUEUE, cols: 1, rows: 1, title: 'Queue', icon: '📥', serviceType: ServiceType.RADARR },
+          { type: WidgetType.AI_RECOMMENDATIONS, cols: 1, rows: 1, title: 'AI Recommendations', icon: '🤖', serviceType: ServiceType.RADARR },
         ];
-      case 'trakt':
+      case ServiceType.TRAKT:
         return [
-          { type: 'trakt-trending-movies', cols: 1, rows: 1, title: 'Trending Movies', icon: '🔥' },
-          { type: 'trakt-trending-shows', cols: 1, rows: 1, title: 'Trending Shows', icon: '📺' },
-          { type: 'unified-recommendations', cols: 1, rows: 1, title: 'Recommended Movies', icon: '🎥' }, // Needs type distinguishing
-          // Note: unified-recommendations handles both movie/show via input, need to handle that in widget config
+          { type: WidgetType.TRAKT_TRENDING_MOVIES, cols: 1, rows: 1, title: 'Trending Movies', icon: '🔥' },
+          { type: WidgetType.TRAKT_TRENDING_SHOWS, cols: 1, rows: 1, title: 'Trending Shows', icon: '📺' },
+          { type: WidgetType.UNIFIED_RECOMMENDATIONS, cols: 1, rows: 1, title: 'Recommended Movies', icon: '🎥' },
         ];
       default:
         return [];
@@ -123,16 +126,16 @@ export class WidgetStoreComponent {
   }
 
   addWidget(widget: Omit<DashboardWidget, 'id' | 'x' | 'y' | 'serviceId'>, serviceId?: string) {
-    if (widget.type === 'unified-recommendations') {
-      this.dashboardService.addWidget({ ...widget, serviceId, type: 'unified-recommendations-movie' });
+    if (widget.type === WidgetType.UNIFIED_RECOMMENDATIONS) {
+      this.dashboardService.addWidget({ ...widget, serviceId, type: WidgetType.UNIFIED_RECOMMENDATIONS_MOVIE });
       return;
     }
     this.dashboardService.addWidget({ ...widget, serviceId });
   }
 
   onDragStart(event: DragEvent, widget: Omit<DashboardWidget, 'id' | 'x' | 'y' | 'serviceId'>, serviceId?: string) {
-    if (widget.type === 'unified-recommendations') {
-      const unifiedWidget = { ...widget, serviceId, type: 'unified-recommendations-movie' };
+    if (widget.type === WidgetType.UNIFIED_RECOMMENDATIONS) {
+      const unifiedWidget = { ...widget, serviceId, type: WidgetType.UNIFIED_RECOMMENDATIONS_MOVIE };
       event.dataTransfer?.setData('arrdeck/widget', JSON.stringify(unifiedWidget));
       event.dataTransfer?.setData('text/plain', JSON.stringify(unifiedWidget));
     } else {
@@ -144,7 +147,7 @@ export class WidgetStoreComponent {
 
   addSmartWidget(title: string, subType: string, icon: string) {
     this.dashboardService.addWidget({
-      type: 'smart-collection',
+      type: WidgetType.SMART_COLLECTION,
       title,
       icon,
       cols: 1,

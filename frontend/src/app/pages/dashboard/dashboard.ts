@@ -1,6 +1,6 @@
 import {Component, effect, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ServiceConfig, ServicesService} from '../../services/services';
+import {ServiceConfig, ServicesService, ServiceType} from '../../services/services';
 import {SonarrCalendarComponent} from '../../integrations/sonarr/components/sonarr-calendar.component';
 import {SonarrRecentComponent} from '../../integrations/sonarr/components/sonarr-recent.component';
 import {RadarrRecentComponent} from '../../integrations/radarr/components/radarr-recent.component';
@@ -16,7 +16,7 @@ import {QueueWidgetComponent} from '../../components/queue-widget/queue-widget.c
 import {SmartCollectionWidget} from '../../components/smart-collection-widget/smart-collection-widget';
 
 import {DisplayGrid, Gridster, GridsterConfig, GridsterItem} from 'angular-gridster2';
-import {DashboardService, DashboardWidget} from './dashboard.service';
+import {DashboardService, DashboardWidget, WidgetType} from './dashboard.service';
 import {WidgetStoreComponent} from './components/widget-store.component';
 
 @Component({
@@ -101,6 +101,10 @@ import {WidgetStoreComponent} from './components/widget-store.component';
 export class Dashboard implements OnInit {
   private servicesService = inject(ServicesService);
   dashboardService = inject(DashboardService);
+
+  // Enums for template access
+  WidgetType = WidgetType;
+  ServiceType = ServiceType;
 
   services = signal<ServiceConfig[]>([]);
 
@@ -226,11 +230,11 @@ export class Dashboard implements OnInit {
 
     services.forEach(service => {
       const sId = service.id;
-      if (service.type === 'sonarr') {
+      if (service.type === ServiceType.SONARR) {
         this.dashboardService.addWidget({
-          type: 'sonarr-calendar',
+          type: WidgetType.SONARR_CALENDAR,
           serviceId: sId,
-          serviceType: 'sonarr',
+          serviceType: ServiceType.SONARR,
           cols: 1,
           rows: 1,
           x: 0,
@@ -238,9 +242,9 @@ export class Dashboard implements OnInit {
           title: 'Calendar'
         });
         this.dashboardService.addWidget({
-          type: 'queue',
+          type: WidgetType.QUEUE,
           serviceId: sId,
-          serviceType: 'sonarr',
+          serviceType: ServiceType.SONARR,
           cols: 1,
           rows: 1,
           x: 1,
@@ -248,9 +252,9 @@ export class Dashboard implements OnInit {
           title: 'Queue'
         });
         this.dashboardService.addWidget({
-          type: 'sonarr-recent',
+          type: WidgetType.SONARR_RECENT,
           serviceId: sId,
-          serviceType: 'sonarr',
+          serviceType: ServiceType.SONARR,
           cols: 1,
           rows: 1,
           x: 2,
@@ -259,9 +263,9 @@ export class Dashboard implements OnInit {
         });
         y += 1;
         this.dashboardService.addWidget({
-          type: 'ai-recommendations',
+          type: WidgetType.AI_RECOMMENDATIONS,
           serviceId: sId,
-          serviceType: 'sonarr',
+          serviceType: ServiceType.SONARR,
           cols: 1,
           rows: 1,
           x: 0,
@@ -269,11 +273,11 @@ export class Dashboard implements OnInit {
           title: 'AI Recommendations'
         });
         y += 1;
-      } else if (service.type === 'radarr') {
+      } else if (service.type === ServiceType.RADARR) {
         this.dashboardService.addWidget({
-          type: 'radarr-recommended',
+          type: WidgetType.RADARR_RECOMMENDED,
           serviceId: sId,
-          serviceType: 'radarr',
+          serviceType: ServiceType.RADARR,
           cols: 1,
           rows: 1,
           x: 0,
@@ -281,9 +285,9 @@ export class Dashboard implements OnInit {
           title: 'Recommended'
         });
         this.dashboardService.addWidget({
-          type: 'queue',
+          type: WidgetType.QUEUE,
           serviceId: sId,
-          serviceType: 'radarr',
+          serviceType: ServiceType.RADARR,
           cols: 1,
           rows: 1,
           x: 1,
@@ -291,9 +295,9 @@ export class Dashboard implements OnInit {
           title: 'Queue'
         });
         this.dashboardService.addWidget({
-          type: 'radarr-recent',
+          type: WidgetType.RADARR_RECENT,
           serviceId: sId,
-          serviceType: 'radarr',
+          serviceType: ServiceType.RADARR,
           cols: 1,
           rows: 1,
           x: 2,
@@ -302,9 +306,9 @@ export class Dashboard implements OnInit {
         });
         y += 1;
         this.dashboardService.addWidget({
-          type: 'ai-recommendations',
+          type: WidgetType.AI_RECOMMENDATIONS,
           serviceId: sId,
-          serviceType: 'radarr',
+          serviceType: ServiceType.RADARR,
           cols: 1,
           rows: 1,
           x: 0,
@@ -312,9 +316,9 @@ export class Dashboard implements OnInit {
           title: 'AI Recommendations'
         });
         y += 1;
-      } else if (service.type === 'trakt') {
+      } else if (service.type === ServiceType.TRAKT) {
         this.dashboardService.addWidget({
-          type: 'unified-recommendations-movie',
+          type: WidgetType.UNIFIED_RECOMMENDATIONS_MOVIE,
           serviceId: sId,
           cols: 1,
           rows: 1,
@@ -323,7 +327,7 @@ export class Dashboard implements OnInit {
           title: 'Movies'
         });
         this.dashboardService.addWidget({
-          type: 'unified-recommendations-show',
+          type: WidgetType.UNIFIED_RECOMMENDATIONS_SHOW,
           serviceId: sId,
           cols: 1,
           rows: 1,
@@ -332,7 +336,7 @@ export class Dashboard implements OnInit {
           title: 'Shows'
         });
         this.dashboardService.addWidget({
-          type: 'trakt-trending-movies',
+          type: WidgetType.TRAKT_TRENDING_MOVIES,
           serviceId: sId,
           cols: 1,
           rows: 1,
@@ -342,7 +346,7 @@ export class Dashboard implements OnInit {
         });
         y += 1;
         this.dashboardService.addWidget({
-          type: 'trakt-trending-shows',
+          type: WidgetType.TRAKT_TRENDING_SHOWS,
           serviceId: sId,
           cols: 1,
           rows: 1,
@@ -356,7 +360,7 @@ export class Dashboard implements OnInit {
 
     if (services.length > 0) {
       this.dashboardService.addWidget({
-        type: 'smart-collection',
+        type: WidgetType.SMART_COLLECTION,
         serviceId: 'underrated',
         cols: 1,
         rows: 1,
@@ -366,7 +370,7 @@ export class Dashboard implements OnInit {
         icon: '💎'
       });
       this.dashboardService.addWidget({
-        type: 'smart-collection',
+        type: WidgetType.SMART_COLLECTION,
         serviceId: 'marathon',
         cols: 1,
         rows: 1,
@@ -376,7 +380,7 @@ export class Dashboard implements OnInit {
         icon: '🍿'
       });
       this.dashboardService.addWidget({
-        type: 'smart-collection',
+        type: WidgetType.SMART_COLLECTION,
         serviceId: 'quick',
         cols: 1,
         rows: 1,
