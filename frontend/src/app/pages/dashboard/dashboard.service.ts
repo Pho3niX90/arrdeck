@@ -83,7 +83,7 @@ export class DashboardService {
 
   addWidget(widget: Partial<DashboardWidget>) {
     const newWidget: DashboardWidget = {
-      id: crypto.randomUUID(),
+      id: this.generateUUID(),
       x: 0,
       y: 0,
       cols: 1,
@@ -93,6 +93,17 @@ export class DashboardService {
     };
 
     this.widgets.update(current => [...current, newWidget]);
+  }
+
+  private generateUUID(): string {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    // Fallback for non-secure contexts (e.g. http) or older browsers
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
   }
 
   removeWidget(id: string) {

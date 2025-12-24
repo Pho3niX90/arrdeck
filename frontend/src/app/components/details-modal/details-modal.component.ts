@@ -1,16 +1,17 @@
-import { Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, signal, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { take } from 'rxjs';
-import { TmdbService } from '../../integrations/tmdb/tmdb.service';
-import { ServicesService, ServiceType } from '../../services/services';
-import { AddMediaModalComponent } from '../add-media-modal/add-media-modal.component';
-import { MetadataService, NormalizedDetails } from '../../services/metadata.service';
-import { LibraryService, LibraryStatus } from '../../services/library.service';
-import { MessageService } from '../../services/message.service';
-import { TmdbCollection, TmdbCredits, TmdbItem } from '../../integrations/tmdb/tmdb.models';
-import { JellyfinService } from '../../integrations/jellyfin/jellyfin.service';
+import {Component, effect, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {take} from 'rxjs';
+import {TmdbService} from '../../integrations/tmdb/tmdb.service';
+import {ServicesService, ServiceType} from '../../services/services';
+import {AddMediaModalComponent} from '../add-media-modal/add-media-modal.component';
+import {MetadataService, NormalizedDetails} from '../../services/metadata.service';
+import {LibraryService, LibraryStatus} from '../../services/library.service';
+import {MessageService} from '../../services/message.service';
+import {TmdbCollection, TmdbCredits, TmdbItem} from '../../integrations/tmdb/tmdb.models';
+import {JellyfinService} from '../../integrations/jellyfin/jellyfin.service';
+import {DetailsModalService} from '../../services/details-modal.service';
 
-import { TmdbImagePipe } from '../../pipes/tmdb-image.pipe';
+import {TmdbImagePipe} from '../../pipes/tmdb-image.pipe';
 
 @Component({
   selector: 'app-details-modal',
@@ -19,14 +20,7 @@ import { TmdbImagePipe } from '../../pipes/tmdb-image.pipe';
   templateUrl: './details-modal.component.html',
   styles: ``
 })
-export class DetailsModalComponent implements OnInit, OnChanges {
-  @Input() traktServiceId?: number;
-  @Input() type: 'movie' | 'show' = 'movie';
-  @Input() traktId?: number;
-  @Input() tmdbId?: number;
-  @Input() tvdbId?: number;
-
-  @Output() close = new EventEmitter<void>();
+export class DetailsModalComponent implements OnInit {
 
   private tmdbService = inject(TmdbService);
   private servicesService = inject(ServicesService);
@@ -34,9 +28,16 @@ export class DetailsModalComponent implements OnInit, OnChanges {
   private libraryService = inject(LibraryService);
   private jellyfinService = inject(JellyfinService);
   private messageService = inject(MessageService);
+  private modalService = inject(DetailsModalService);
 
   isOpen = false;
   loading = signal(true);
+
+  // Local state mirrored from service for logic
+  type: 'movie' | 'show' = 'movie';
+  tmdbId?: number;
+  traktId?: number;
+  tvdbId?: number;
 
   details = signal<NormalizedDetails | null>(null);
   people = signal<TmdbCredits | null>(null);
@@ -66,6 +67,25 @@ export class DetailsModalComponent implements OnInit, OnChanges {
   // TMDB Config
   private tmdbServiceId?: number;
 
+  constructor() {
+    effect(() => {
+      const state = this.modalService.state();
+      if (state.isOpen) {
+        // Only trigger open if different or previously closed
+        if (!this.isOpen || state.tmdbId !== this.tmdbId || state.traktId !== this.traktId) {
+          this.type = state.type;
+          this.tmdbId = state.tmdbId;
+          this.traktId = state.traktId;
+          this.tvdbId = state.tvdbId;
+          this.open();
+        }
+      } else {
+        this.isOpen = false;
+        // Reset local data on close logic handled in onClose but UI might just behave.
+      }
+    });
+  }
+
   ngOnInit() {
     this.libraryService.ensureLibraryCache().subscribe();
     this.servicesService.getServices().subscribe(services => {
@@ -82,16 +102,6 @@ export class DetailsModalComponent implements OnInit, OnChanges {
   }
 
   private jellyfinApiKey = '';
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['tmdbId'] || changes['traktId'] || changes['tvdbId']) {
-      // Only open if we have at least one ID and it's not a reset (undefined/null)
-      const hasId = this.tmdbId || this.traktId || this.tvdbId;
-      if (hasId) {
-        this.open();
-      }
-    }
-  }
 
   open() {
     this.isOpen = true;
@@ -152,8 +162,9 @@ export class DetailsModalComponent implements OnInit, OnChanges {
   }
 
   onClose() {
+    this.modalService.close(); // Signal close to service
+    // Local cleanup
     this.isOpen = false;
-    this.close.emit();
     this.details.set(null);
     this.people.set(null);
     this.inLibrary.set(false);
@@ -192,7 +203,7 @@ export class DetailsModalComponent implements OnInit, OnChanges {
   fetchCollectionDetails(collectionId: number) {
     if (!this.tmdbServiceId) return;
     this.tmdbService.getCollection(this.tmdbServiceId, collectionId).subscribe(data => {
-      const tmdbData: any = { ...data, tmdbId: data.id };
+      const tmdbData: any = {...data, tmdbId: data.id};
       delete tmdbData.id;
 
       if (tmdbData.parts) {
@@ -247,11 +258,10 @@ export class DetailsModalComponent implements OnInit, OnChanges {
   }
 
   switchToItem(tmdbId: number, type?: 'movie' | 'show') {
-    this.tmdbId = tmdbId;
-    this.traktId = undefined;
-    this.tvdbId = undefined;
-    if (type) this.type = type;
-    this.open();
+    this.modalService.open({
+      tmdbId,
+      type: type || (this.type as 'movie' | 'show') // cast safely or default
+    });
     const scrollContainer = document.querySelector('.overflow-y-auto');
     if (scrollContainer) scrollContainer.scrollTop = 0;
   }
@@ -263,7 +273,7 @@ export class DetailsModalComponent implements OnInit, OnChanges {
         if (status.inLibrary) this.inLibrary.set(true);
         if (status.collectionTmdbId) this.fetchCollectionDetails(status.collectionTmdbId);
         if (status.images) {
-          this.details.update(d => d ? ({ ...d, images: status.images }) : null);
+          this.details.update(d => d ? ({...d, images: status.images}) : null);
         }
         if (status.sonarrEpisodes) {
           this.sonarrEpisodes.set(status.sonarrEpisodes);
@@ -305,7 +315,7 @@ export class DetailsModalComponent implements OnInit, OnChanges {
     this.libraryService.addCollection(col, config).subscribe({
       next: () => {
         this.messageService.show('Collection movies added to Radarr queue', 'success');
-        this.collectionInfo.update(c => c ? { ...c, monitored: true } : null);
+        this.collectionInfo.update(c => c ? {...c, monitored: true} : null);
         this.fetchCollectionDetails(col.tmdbId!); // Refresh to show In Library status
       },
       error: (err) => {

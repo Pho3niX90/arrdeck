@@ -11,8 +11,3 @@
 
   <app-media-carousel [items]="mediaItems()"/>
 </app-widget-card>
-
-@if (isModalOpen) {
-  <app-details-modal [traktServiceId]="serviceId()" [traktId]="selectedTraktId!" [type]="'show'"
-                     (close)="isModalOpen = false"></app-details-modal>
-}

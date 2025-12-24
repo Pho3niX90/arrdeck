@@ -6,6 +6,7 @@ import {filter} from 'rxjs/operators';
 
 import {GlobalSearchComponent, OpenDetailsEvent} from '../global-search/global-search.component';
 import {DetailsModalComponent} from '../details-modal/details-modal.component';
+import {DetailsModalService} from '../../services/details-modal.service';
 
 import {AiChatWidgetComponent} from '../ai-chat-widget/ai-chat-widget.component';
 import {SearchService} from '../../services/search.service';
@@ -62,12 +63,7 @@ export class Layout {
   }
 
   // Details Modal State
-  detailsModalOpen = signal(false);
-  detailsType: 'movie' | 'show' = 'movie';
-  detailsTmdbId?: number;
-  detailsTvdbId?: number;
-  detailsTraktId?: number;
-  detailsTraktServiceId?: number;
+  private detailsModalService = inject(DetailsModalService);
 
   resolveAndOpen(title: string, year: number, type: 'movie' | 'show') {
     if (!this.traktServiceId) {
@@ -105,19 +101,19 @@ export class Layout {
   }
 
   openDetailsModal(event: any) {
-    this.detailsType = event.type;
-    this.detailsTmdbId = event.tmdbId;
-    this.detailsTraktId = event.traktId; // might be undefined
-    this.detailsTraktServiceId = this.traktServiceId;
-    this.detailsModalOpen.set(true);
+    this.detailsModalService.open({
+      type: event.type,
+      tmdbId: event.tmdbId,
+      traktId: event.traktId
+    });
   }
 
   onOpenDetails(event: OpenDetailsEvent) {
-    this.detailsType = event.type;
-    this.detailsTmdbId = event.tmdbId;
-    this.detailsTvdbId = event.tvdbId;
-    this.detailsTraktId = event.traktId;
-    this.detailsTraktServiceId = event.traktServiceId
-    this.detailsModalOpen.set(true);
+    this.detailsModalService.open({
+      type: event.type,
+      tmdbId: event.tmdbId,
+      tvdbId: event.tvdbId,
+      traktId: event.traktId
+    });
   }
 }

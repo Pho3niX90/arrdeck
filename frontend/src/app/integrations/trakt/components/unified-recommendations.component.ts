@@ -1,8 +1,8 @@
-import {Component, computed, inject, Input, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, Input, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Observable, of} from 'rxjs';
 import {catchError} from 'rxjs/operators';
-import {DetailsModalComponent} from '../../../components/details-modal/details-modal.component';
+import {DetailsModalService} from '../../../services/details-modal.service';
 import {MediaItem, MediaSourceIcon} from '../../../shared/models/media-item.model';
 import {TraktService} from '../trakt.service';
 import {RadarrDataService} from '../../radarr/radarr.data.service';
@@ -26,7 +26,7 @@ interface UnifiedItem {
 @Component({
   selector: 'app-unified-recommendations',
   standalone: true,
-  imports: [CommonModule, HorizontalCardComponent, DetailsModalComponent],
+  imports: [CommonModule, HorizontalCardComponent],
   providers: [TmdbImagePipe],
   templateUrl: './unified-recommendations.component.html',
   styles: ``
@@ -34,13 +34,12 @@ interface UnifiedItem {
 export class UnifiedRecommendationsComponent extends WidgetBase implements OnInit {
   @Input() type: 'movie' | 'show' = 'movie';
 
-  @ViewChild(DetailsModalComponent) detailsModal!: DetailsModalComponent;
-
   private traktService = inject(TraktService);
   private radarrService = inject(RadarrDataService);
   private sonarrService = inject(SonarrDataService);
   private servicesService = inject(ServicesService);
   private tmdbImagePipe = inject(TmdbImagePipe);
+  private detailsModalService = inject(DetailsModalService);
 
   loading = signal(true);
 
@@ -59,6 +58,9 @@ export class UnifiedRecommendationsComponent extends WidgetBase implements OnIni
   ngOnInit() {
     this.loadData();
   }
+
+  // ... (lines 63-207 skipped as unchanged logic)
+
 
   loadData() {
     this.loading.set(true);
@@ -224,11 +226,12 @@ export class UnifiedRecommendationsComponent extends WidgetBase implements OnIni
       imageUrl: this.tmdbImagePipe.transform(this.ensureProtocol(item.poster), 'w190'),
       sourceIcons: icons,
       clickAction: () => {
-        this.detailsModal.type = this.type;
-        this.detailsModal.traktId = item.ids.trakt;
-        this.detailsModal.tmdbId = item.ids.tmdb;
-        this.detailsModal.tvdbId = item.ids.tvdb;
-        this.detailsModal.open();
+        this.detailsModalService.open({
+          type: this.type,
+          traktId: item.ids.trakt,
+          tmdbId: item.ids.tmdb,
+          tvdbId: item.ids.tvdb
+        });
       },
       accentColor: this.type === 'movie' ? 'text-amber-400' : 'text-emerald-400'
     };

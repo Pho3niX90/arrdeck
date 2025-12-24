@@ -1,7 +1,7 @@
 import { Component, computed, inject, input, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LibraryItem, LibraryService } from '../../services/library.service';
-import { DetailsModalComponent } from '../details-modal/details-modal.component';
+import { DetailsModalService } from '../../services/details-modal.service';
 import { MediaItem } from '../../shared/models/media-item.model';
 import { WidgetBase } from '../../shared/base/widget-base';
 import { HorizontalCardComponent } from '../../shared/components/horizontal-card/horizontal-card.component';
@@ -9,7 +9,7 @@ import { HorizontalCardComponent } from '../../shared/components/horizontal-card
 @Component({
   selector: 'app-smart-collection-widget',
   standalone: true,
-  imports: [CommonModule, HorizontalCardComponent, DetailsModalComponent],
+  imports: [CommonModule, HorizontalCardComponent],
   template: `
     <app-horizontal-card
       [title]="title()"
@@ -25,8 +25,6 @@ import { HorizontalCardComponent } from '../../shared/components/horizontal-card
           <span class="text-xs">{{ icon() }}</span>
         }
       </div>
-
-      <app-details-modal></app-details-modal>
     </app-horizontal-card>
   `
 })
@@ -36,8 +34,7 @@ export class SmartCollectionWidget extends WidgetBase implements OnInit {
   icon = input<string>();
 
   private libraryService = inject(LibraryService);
-
-  @ViewChild(DetailsModalComponent) detailsModal!: DetailsModalComponent;
+  private detailsModalService = inject(DetailsModalService);
 
   items = signal<LibraryItem[]>([]);
   loading = signal(true);
@@ -98,9 +95,10 @@ export class SmartCollectionWidget extends WidgetBase implements OnInit {
   }
 
   openDetails(item: LibraryItem) {
-    this.detailsModal.tmdbId = item.tmdbId;
-    this.detailsModal.type = item.type;
-    this.detailsModal.tvdbId = item.tvdbId;
-    this.detailsModal.open();
+    this.detailsModalService.open({
+      tmdbId: item.tmdbId,
+      type: item.type,
+      tvdbId: item.tvdbId
+    });
   }
 }

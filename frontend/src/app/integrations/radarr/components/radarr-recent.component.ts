@@ -1,10 +1,10 @@
-import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RadarrDataService} from '../radarr.data.service';
 import {RadarrMovie} from '../radarr.models';
 import {MediaItem} from '../../../shared/models/media-item.model';
 import {TimeAgoPipe} from '../../../pipes/time-ago.pipe';
-import {DetailsModalComponent} from '../../../components/details-modal/details-modal.component';
+import {DetailsModalService} from '../../../services/details-modal.service';
 
 import {TmdbImagePipe} from '../../../pipes/tmdb-image.pipe';
 
@@ -14,17 +14,17 @@ import {HorizontalCardComponent} from '../../../shared/components/horizontal-car
 @Component({
   selector: 'app-radarr-recent',
   standalone: true,
-  imports: [CommonModule, HorizontalCardComponent, DetailsModalComponent],
+  imports: [CommonModule, HorizontalCardComponent],
   providers: [TimeAgoPipe, TmdbImagePipe],
   templateUrl: './radarr-recent.component.html',
   styles: ``
 })
 export class RadarrRecentComponent extends WidgetBase implements OnInit {
-  @ViewChild(DetailsModalComponent) detailsModal!: DetailsModalComponent;
 
   private dataService = inject(RadarrDataService);
   private timeAgoPipe = inject(TimeAgoPipe);
   private tmdbImagePipe = inject(TmdbImagePipe);
+  private detailsModalService = inject(DetailsModalService);
 
   movies = signal<RadarrMovie[]>([]);
 
@@ -61,8 +61,9 @@ export class RadarrRecentComponent extends WidgetBase implements OnInit {
   }
 
   openDetails(movie: RadarrMovie) {
-    this.detailsModal.type = 'movie';
-    this.detailsModal.tmdbId = movie.tmdbId;
-    this.detailsModal.open();
+    this.detailsModalService.open({
+      type: 'movie',
+      tmdbId: movie.tmdbId
+    });
   }
 }

@@ -1,8 +1,8 @@
-import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {TraktService} from '../trakt.service';
 import {TraktMovie, TraktTrendingItem} from '../trakt.models';
-import {DetailsModalComponent} from '../../../components/details-modal/details-modal.component';
+import {DetailsModalService} from '../../../services/details-modal.service';
 import {RadarrService} from '../../radarr/radarr.service';
 import {ServicesService} from '../../../services/services';
 import {MediaItem} from '../../../shared/models/media-item.model';
@@ -13,17 +13,16 @@ import {HorizontalCardComponent} from '../../../shared/components/horizontal-car
 @Component({
   selector: 'app-trakt-trending-movies',
   standalone: true,
-  imports: [CommonModule, HorizontalCardComponent, DetailsModalComponent],
+  imports: [CommonModule, HorizontalCardComponent],
   templateUrl: './trakt-trending-movies.component.html',
   styles: ``
 })
 export class TraktTrendingMoviesComponent extends WidgetBase implements OnInit {
 
-  @ViewChild(DetailsModalComponent) detailsModal!: DetailsModalComponent;
-
   private traktService = inject(TraktService);
   private servicesService = inject(ServicesService);
   private radarrService = inject(RadarrService);
+  private detailsModalService = inject(DetailsModalService);
 
   movies = signal<TraktTrendingItem<TraktMovie>[]>([]);
   libraryIds = signal<Set<number>>(new Set());
@@ -100,9 +99,10 @@ export class TraktTrendingMoviesComponent extends WidgetBase implements OnInit {
   }
 
   openDetails(movie: TraktMovie) {
-    this.detailsModal.traktServiceId = this.serviceId();
-    this.detailsModal.type = 'movie';
-    this.detailsModal.traktId = movie.ids.trakt;
-    this.detailsModal.open();
+    this.detailsModalService.open({
+      traktId: movie.ids.trakt,
+      tmdbId: movie.ids.tmdb,
+      type: 'movie'
+    });
   }
 }

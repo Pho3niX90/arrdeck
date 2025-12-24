@@ -12,11 +12,10 @@
     <div class="flex flex-wrap gap-3">
       <!-- Search -->
       <div class="relative">
-        <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
-               placeholder="Filter..."
+        <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" placeholder="Filter..."
                class="bg-slate-950 border border-slate-700/50 text-white rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500/50 w-48 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-             stroke="currentColor" class="w-4 h-4 text-slate-500 absolute left-3 top-2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+             class="w-4 h-4 text-slate-500 absolute left-3 top-2.5">
           <path stroke-linecap="round" stroke-linejoin="round"
                 d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
         </svg>
@@ -24,18 +23,15 @@
 
       <!-- Type Filter -->
       <div class="flex bg-slate-950 rounded-lg p-1 border border-slate-700/50">
-        <button (click)="filterType.set('all')"
-                class="px-3 py-1.5 rounded-md text-xs font-medium transition-all"
+        <button (click)="filterType.set('all')" class="px-3 py-1.5 rounded-md text-xs font-medium transition-all"
                 [class]="filterType() === 'all' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'">
           All
         </button>
-        <button (click)="filterType.set('movie')"
-                class="px-3 py-1.5 rounded-md text-xs font-medium transition-all"
+        <button (click)="filterType.set('movie')" class="px-3 py-1.5 rounded-md text-xs font-medium transition-all"
                 [class]="filterType() === 'movie' ? 'bg-blue-600/20 text-blue-400 shadow-sm' : 'text-slate-400 hover:text-slate-200'">
           Movies
         </button>
-        <button (click)="filterType.set('show')"
-                class="px-3 py-1.5 rounded-md text-xs font-medium transition-all"
+        <button (click)="filterType.set('show')" class="px-3 py-1.5 rounded-md text-xs font-medium transition-all"
                 [class]="filterType() === 'show' ? 'bg-purple-600/20 text-purple-400 shadow-sm' : 'text-slate-400 hover:text-slate-200'">
           Shows
         </button>
@@ -111,11 +107,11 @@
 
               <!-- Type Badge -->
               <div class="absolute top-2 right-2 -mt-[calc(100%+8px)]">
-                        <span
-                          class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border border-white/10"
-                          [class]="item.type === 'movie' ? 'bg-blue-500/20 text-blue-300' : 'bg-purple-500/20 text-purple-300'">
-                            {{ item.type }}
-                        </span>
+            <span
+              class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border border-white/10"
+              [class]="item.type === 'movie' ? 'bg-blue-500/20 text-blue-300' : 'bg-purple-500/20 text-purple-300'">
+              {{ item.type }}
+            </span>
               </div>
             </div>
           </div>
@@ -124,8 +120,3 @@
     </div>
   }
 </div>
-
-@if (detailsModal()) {
-  <app-details-modal [type]="detailsModal()!.type" [tmdbId]="detailsModal()!.tmdbId" [tvdbId]="detailsModal()!.tvdbId"
-                     (close)="detailsModal.set(null)"></app-details-modal>
-}
