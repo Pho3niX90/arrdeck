@@ -1,25 +1,25 @@
-import {Component, computed, inject, Input, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {SonarrDataService} from '../sonarr.data.service';
 import {SonarrSeries} from '../sonarr.models';
-import {WidgetCardComponent} from '../../../components/widget-card/widget-card.component';
-import {MediaCarouselComponent} from '../../../shared/components/media-carousel/media-carousel.component';
 import {MediaItem} from '../../../shared/models/media-item.model';
 import {TimeAgoPipe} from '../../../pipes/time-ago.pipe';
 import {DetailsModalComponent} from '../../../components/details-modal/details-modal.component';
 
 import {TmdbImagePipe} from '../../../pipes/tmdb-image.pipe';
 
+import {WidgetBase} from '../../../shared/base/widget-base';
+import {HorizontalCardComponent} from '../../../shared/components/horizontal-card/horizontal-card.component';
+
 @Component({
   selector: 'app-sonarr-recent',
   standalone: true,
-  imports: [CommonModule, WidgetCardComponent, MediaCarouselComponent, DetailsModalComponent],
+  imports: [CommonModule, HorizontalCardComponent, DetailsModalComponent],
   providers: [TimeAgoPipe, TmdbImagePipe],
   templateUrl: './sonarr-recent.component.html',
   styles: ``
 })
-export class SonarrRecentComponent implements OnInit {
-  @Input({required: true}) serviceId!: number;
+export class SonarrRecentComponent extends WidgetBase implements OnInit {
 
   @ViewChild(DetailsModalComponent) detailsModal!: DetailsModalComponent;
 
@@ -34,8 +34,8 @@ export class SonarrRecentComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.dataService.loadSeries(this.serviceId).subscribe(() => {
-      const allSeries = this.dataService.getSeriesForService(this.serviceId);
+    this.dataService.loadSeries(this.serviceId()).subscribe(() => {
+      const allSeries = this.dataService.getSeriesForService(this.serviceId());
       const sorted = allSeries.sort((a, b) => new Date(b.added).getTime() - new Date(a.added).getTime());
       this.shows.set(sorted.slice(0, 15));
     });

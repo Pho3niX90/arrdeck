@@ -4,7 +4,7 @@
     <div class="flex flex-col">
       <div class="flex items-center gap-2 mb-1">
         <ng-content select="[header-icon]"></ng-content>
-        <span class="text-sm font-medium" [ngClass]="accentColor()">{{ subtitle() }}</span>
+        <span class="text-sm font-medium" [ngClass]="accentColor()">{{ subtitle() ?? '' }}</span>
       </div>
       <h3 class="text-xl font-bold text-white tracking-wide">
         {{ title() }}

@@ -1,7 +1,20 @@
-import {Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, UseInterceptors,} from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Get,
+    Param,
+    ParseIntPipe,
+    Post,
+    Put,
+    Query,
+    UseGuards,
+    UseInterceptors,
+} from '@nestjs/common';
 import {CacheInterceptor} from '@nestjs/cache-manager';
 import {RadarrService} from './radarr.service';
+import {JwtAuthGuard} from '../../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller({path: 'integrations/radarr', version: '1'})
 export class RadarrController {
     constructor(private readonly radarrService: RadarrService) {

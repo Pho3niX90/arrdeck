@@ -1,7 +1,10 @@
-import {Body, Controller, Get, Param, Post, Query, UseInterceptors,} from '@nestjs/common';
+import {Body, Controller, Get, Param, Post, Query, UseGuards, UseInterceptors,} from '@nestjs/common';
 import {CacheInterceptor} from '@nestjs/cache-manager';
 import {SonarrService} from './sonarr.service';
 
+import {JwtAuthGuard} from '../../auth/jwt-auth.guard';
+
+@UseGuards(JwtAuthGuard)
 @Controller({path: 'integrations/sonarr', version: '1'})
 export class SonarrController {
     constructor(private readonly sonarrService: SonarrService) {

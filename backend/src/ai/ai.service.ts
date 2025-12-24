@@ -39,6 +39,7 @@ export interface RecommendationRequest {
     serviceId: number;
     type: 'sonarr' | 'radarr';
     prompt?: string;
+    forceRefresh?: boolean;
 }
 
 export interface RecommendationResponse {
@@ -100,12 +101,12 @@ export class AiService {
     async getRecommendations(
         request: RecommendationRequest,
     ): Promise<RecommendationResponse> {
-        const {serviceId, type, prompt} = request;
+        const {serviceId, type, prompt, forceRefresh} = request;
 
         const isAuto = !prompt || prompt.trim() === '';
         const cacheKey = `ai:recs:${serviceId}:${type}`;
 
-        if (isAuto) {
+        if (isAuto && !forceRefresh) {
             const cached =
                 await this.cacheManager.get<RecommendationResponse>(cacheKey);
             if (cached) {

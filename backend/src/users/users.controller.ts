@@ -1,10 +1,34 @@
-import {Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post} from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    NotFoundException,
+    Param,
+    ParseIntPipe,
+    Patch,
+    Post,
+    Request,
+    UseGuards
+} from '@nestjs/common';
+import {JwtAuthGuard} from '../auth/jwt-auth.guard';
 import {UsersService} from './users.service';
 import {User} from './user.entity';
 
+@UseGuards(JwtAuthGuard)
 @Controller({path: 'users', version: '1'})
 export class UsersController {
     constructor(private readonly usersService: UsersService) {
+    }
+
+    @Get('me')
+    getProfile(@Request() req) {
+        return this.usersService.findById(req.user.userId);
+    }
+
+    @Patch('me')
+    updateProfile(@Request() req, @Body() user: Partial<User>) {
+        return this.usersService.update(req.user.userId, user);
     }
 
     @Get()

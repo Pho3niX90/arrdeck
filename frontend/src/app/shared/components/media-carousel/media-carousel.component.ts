@@ -12,12 +12,11 @@ import {
 import {CommonModule} from '@angular/common';
 import {MediaCardComponent} from '../media-card/media-card.component';
 import {MediaItem} from '../../models/media-item.model';
-import {HorizontalScrollDirective} from '../../../directives/horizontal-scroll.directive';
 
 @Component({
   selector: 'app-media-carousel',
   standalone: true,
-  imports: [CommonModule, MediaCardComponent, HorizontalScrollDirective],
+  imports: [CommonModule, MediaCardComponent],
   templateUrl: './media-carousel.component.html',
   styles: [`
     :host {
@@ -30,6 +29,7 @@ import {HorizontalScrollDirective} from '../../../directives/horizontal-scroll.d
 })
 export class MediaCarouselComponent implements AfterViewInit, OnDestroy {
   items = input.required<MediaItem[]>();
+  rows = input(1);
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLElement>;
 
@@ -47,6 +47,7 @@ export class MediaCarouselComponent implements AfterViewInit, OnDestroy {
   }
 
   startScroll() {
+    if (this.rows() > 1) return; // No auto-scroll in grid mode
     this.ngZone.runOutsideAngular(() => {
       const scroll = () => {
         if (!this.isPaused && this.scrollContainer && this.scrollContainer.nativeElement) {

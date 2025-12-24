@@ -21,6 +21,7 @@ ArrDeck centralizes your critical data into bite-sized, interactive widgets:
 *   **📀 Recent Downloads**: A visual feed of the latest content added to your library.
 *   **🎬 Trakt Trending**: See what's popular worldwide right now. Items already in your library are clearly marked, saving you from accidental double-downloads.
 *   **📊 Library Stats**: Beautiful visualizations of your collection size, quality profiles, and disk usage.
+*   **🎨 Customizable Layout**: Rearrange widgets to suit your workflow. Enter "Edit Mode" to access the widget store, which pushes your dashboard aside for a focused editing experience.
 
 ### 🧠 Context-Aware AI Assistant
 Powered by **Google Gemini** or **Ollama**, the built-in AI isn't just a chatbot—it's a library admin.

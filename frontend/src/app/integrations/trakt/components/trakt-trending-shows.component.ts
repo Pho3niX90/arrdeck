@@ -1,23 +1,23 @@
-import {Component, computed, inject, Input, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {TraktService} from '../trakt.service';
 import {TraktShow, TraktTrendingItem} from '../trakt.models';
-import {WidgetCardComponent} from '../../../components/widget-card/widget-card.component';
 import {DetailsModalComponent} from '../../../components/details-modal/details-modal.component';
 import {SonarrService} from '../../sonarr/sonarr.service';
 import {ServicesService} from '../../../services/services';
-import {MediaCarouselComponent} from '../../../shared/components/media-carousel/media-carousel.component';
 import {MediaItem} from '../../../shared/models/media-item.model';
+
+import {WidgetBase} from '../../../shared/base/widget-base';
+import {HorizontalCardComponent} from '../../../shared/components/horizontal-card/horizontal-card.component';
 
 @Component({
   selector: 'app-trakt-trending-shows',
   standalone: true,
-  imports: [CommonModule, WidgetCardComponent, DetailsModalComponent, MediaCarouselComponent],
+  imports: [CommonModule, HorizontalCardComponent, DetailsModalComponent],
   templateUrl: './trakt-trending-shows.component.html',
   styles: ``
 })
-export class TraktTrendingShowsComponent implements OnInit {
-  @Input({required: true}) serviceId!: number;
+export class TraktTrendingShowsComponent extends WidgetBase implements OnInit {
 
   @ViewChild(DetailsModalComponent) detailsModal!: DetailsModalComponent;
 
@@ -33,7 +33,7 @@ export class TraktTrendingShowsComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.traktService.getTrendingShows(this.serviceId).subscribe(data => {
+    this.traktService.getTrendingShows(this.serviceId()).subscribe(data => {
       this.shows.set(data);
     });
     this.checkLibrary();
@@ -103,7 +103,7 @@ export class TraktTrendingShowsComponent implements OnInit {
   }
 
   openDetails(show: TraktShow) {
-    this.detailsModal.traktServiceId = this.serviceId;
+    this.detailsModal.traktServiceId = this.serviceId();
     this.detailsModal.type = 'show';
     this.detailsModal.traktId = show.ids.trakt;
     this.detailsModal.open();

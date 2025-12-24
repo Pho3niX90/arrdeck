@@ -2,8 +2,6 @@ import {Component, computed, inject, Input, OnInit, signal, ViewChild} from '@an
 import {CommonModule} from '@angular/common';
 import {Observable, of} from 'rxjs';
 import {catchError} from 'rxjs/operators';
-import {MediaCarouselComponent} from '../../../shared/components/media-carousel/media-carousel.component';
-import {WidgetCardComponent} from '../../../components/widget-card/widget-card.component';
 import {DetailsModalComponent} from '../../../components/details-modal/details-modal.component';
 import {MediaItem, MediaSourceIcon} from '../../../shared/models/media-item.model';
 import {TraktService} from '../trakt.service';
@@ -11,6 +9,8 @@ import {RadarrDataService} from '../../radarr/radarr.data.service';
 import {SonarrDataService} from '../../sonarr/sonarr.data.service';
 import {ServicesService, ServiceType} from '../../../services/services';
 import {TmdbImagePipe} from '../../../pipes/tmdb-image.pipe';
+import {WidgetBase} from '../../../shared/base/widget-base';
+import {HorizontalCardComponent} from '../../../shared/components/horizontal-card/horizontal-card.component';
 
 interface UnifiedItem {
   ids: { tmdb?: number; tvdb?: number; trakt?: number };
@@ -26,12 +26,12 @@ interface UnifiedItem {
 @Component({
   selector: 'app-unified-recommendations',
   standalone: true,
-  imports: [CommonModule, MediaCarouselComponent, WidgetCardComponent, DetailsModalComponent],
+  imports: [CommonModule, HorizontalCardComponent, DetailsModalComponent],
   providers: [TmdbImagePipe],
   templateUrl: './unified-recommendations.component.html',
   styles: ``
 })
-export class UnifiedRecommendationsComponent implements OnInit {
+export class UnifiedRecommendationsComponent extends WidgetBase implements OnInit {
   @Input() type: 'movie' | 'show' = 'movie';
 
   @ViewChild(DetailsModalComponent) detailsModal!: DetailsModalComponent;
