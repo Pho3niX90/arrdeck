@@ -26,7 +26,11 @@ export class AuthService {
   refreshProfile() {
     this.http.get('/api/v1/users/me').subscribe({
       next: (user) => this.currentUser.set(user),
-      error: () => this.logout() // Token likely invalid
+      error: (err) => {
+        if (err.status === 401 || err.status === 403) {
+          this.logout();
+        }
+      }
     });
   }
 

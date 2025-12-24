@@ -79,14 +79,14 @@ export class AiRecommendationsWidgetComponent extends WidgetBase implements OnIn
   customPrompt = signal('');
   showPromptInput = signal(false);
 
-  generate() {
+  generate(force = false) {
     this.loading.set(true);
     this.error.set(null);
     this.recommendations.set([]);
 
     const prompt = this.customPrompt() || undefined;
 
-    this.aiService.getRecommendations(this.serviceId(), this.type(), prompt).subscribe({
+    this.aiService.getRecommendations(this.serviceId(), this.type(), prompt, force).subscribe({
       next: (response: RecommendationResponse) => {
         this.loading.set(false);
         this.enrichRecommendations(response.recommendations);
