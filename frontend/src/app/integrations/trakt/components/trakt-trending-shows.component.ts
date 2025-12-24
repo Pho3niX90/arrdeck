@@ -1,8 +1,8 @@
-import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {TraktService} from '../trakt.service';
 import {TraktShow, TraktTrendingItem} from '../trakt.models';
-import {DetailsModalComponent} from '../../../components/details-modal/details-modal.component';
+import {DetailsModalService} from '../../../services/details-modal.service';
 import {SonarrService} from '../../sonarr/sonarr.service';
 import {ServicesService} from '../../../services/services';
 import {MediaItem} from '../../../shared/models/media-item.model';
@@ -13,17 +13,16 @@ import {HorizontalCardComponent} from '../../../shared/components/horizontal-car
 @Component({
   selector: 'app-trakt-trending-shows',
   standalone: true,
-  imports: [CommonModule, HorizontalCardComponent, DetailsModalComponent],
+  imports: [CommonModule, HorizontalCardComponent],
   templateUrl: './trakt-trending-shows.component.html',
   styles: ``
 })
 export class TraktTrendingShowsComponent extends WidgetBase implements OnInit {
 
-  @ViewChild(DetailsModalComponent) detailsModal!: DetailsModalComponent;
-
   private traktService = inject(TraktService);
   private servicesService = inject(ServicesService);
   private sonarrService = inject(SonarrService);
+  private detailsModalService = inject(DetailsModalService);
 
   shows = signal<TraktTrendingItem<TraktShow>[]>([]);
   libraryIds = signal<Set<number>>(new Set());
@@ -103,9 +102,11 @@ export class TraktTrendingShowsComponent extends WidgetBase implements OnInit {
   }
 
   openDetails(show: TraktShow) {
-    this.detailsModal.traktServiceId = this.serviceId();
-    this.detailsModal.type = 'show';
-    this.detailsModal.traktId = show.ids.trakt;
-    this.detailsModal.open();
+    this.detailsModalService.open({
+      traktId: show.ids.trakt,
+      tmdbId: show.ids.tmdb,
+      tvdbId: show.ids.tvdb,
+      type: 'show'
+    });
   }
 }

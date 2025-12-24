@@ -1,6 +1,5 @@
-import {Component, computed, inject, input, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, input, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {DetailsModalComponent} from '../details-modal/details-modal.component';
 import {AiRecommendationsService, RecommendationResponse} from '../../services/ai-recommendations.service';
 import {MessageService} from '../../services/message.service';
 import {WidgetCardComponent} from '../widget-card/widget-card.component';
@@ -12,6 +11,7 @@ import {RadarrService} from '../../integrations/radarr/radarr.service';
 import {forkJoin, of} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {TmdbImagePipe} from '../../pipes/tmdb-image.pipe';
+import {DetailsModalService} from '../../services/details-modal.service';
 
 import {WidgetBase} from '../../shared/base/widget-base';
 
@@ -30,15 +30,13 @@ interface EnrichedRecommendation {
 @Component({
   selector: 'app-ai-recommendations-widget',
   standalone: true,
-  imports: [CommonModule, WidgetCardComponent, FormsModule, DetailsModalComponent, MediaCarouselComponent],
+  imports: [CommonModule, WidgetCardComponent, FormsModule, MediaCarouselComponent],
   providers: [TmdbImagePipe],
   templateUrl: './ai-recommendations-widget.component.html',
   styleUrls: ['./ai-recommendations-widget.component.css']
 })
 export class AiRecommendationsWidgetComponent extends WidgetBase implements OnInit {
   type = input.required<'sonarr' | 'radarr'>();
-
-  @ViewChild(DetailsModalComponent) detailsModal!: DetailsModalComponent;
 
   ngOnInit() {
     this.generate();
@@ -49,6 +47,7 @@ export class AiRecommendationsWidgetComponent extends WidgetBase implements OnIn
   private radarrService = inject(RadarrService);
   private tmdbImagePipe = inject(TmdbImagePipe);
   private messageService = inject(MessageService);
+  private detailsModalService = inject(DetailsModalService);
 
   recommendations = signal<EnrichedRecommendation[]>([]);
 
@@ -145,17 +144,14 @@ export class AiRecommendationsWidgetComponent extends WidgetBase implements OnIn
   }
 
   openDetails(item: any) {
-    this.detailsModal.type = this.type() === 'sonarr' ? 'show' : 'movie';
-
-    this.detailsModal.traktId = undefined;
-    this.detailsModal.tmdbId = undefined;
-    this.detailsModal.tvdbId = undefined;
-
-    if (item.tmdbId) this.detailsModal.tmdbId = item.tmdbId;
-    if (item.tvdbId) this.detailsModal.tvdbId = item.tvdbId;
+    const type = this.type() === 'sonarr' ? 'show' : 'movie';
 
     if (item.tmdbId || item.tvdbId) {
-      this.detailsModal.open();
+      this.detailsModalService.open({
+        tmdbId: item.tmdbId,
+        tvdbId: item.tvdbId,
+        type: type
+      });
     } else {
       console.warn('Cannot open details: No usable ID found for', item.title);
     }

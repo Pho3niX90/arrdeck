@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {TraktService} from '../trakt.service';
 import {TraktShow} from '../trakt.models';
 import {WidgetCardComponent} from '../../../components/widget-card/widget-card.component';
-import {DetailsModalComponent} from '../../../components/details-modal/details-modal.component';
+import {DetailsModalService} from '../../../services/details-modal.service';
 import {SonarrService} from '../../sonarr/sonarr.service';
 import {ServicesService, ServiceType} from '../../../services/services';
 import {MediaCarouselComponent} from '../../../shared/components/media-carousel/media-carousel.component';
@@ -14,7 +14,7 @@ import {WidgetBase} from '../../../shared/base/widget-base';
 @Component({
   selector: 'app-trakt-recommended-shows',
   standalone: true,
-  imports: [CommonModule, DetailsModalComponent, MediaCarouselComponent, WidgetCardComponent],
+  imports: [CommonModule, MediaCarouselComponent, WidgetCardComponent],
   templateUrl: './trakt-recommended-shows.component.html',
   styles: ``
 })
@@ -23,14 +23,10 @@ export class TraktRecommendedShowsComponent extends WidgetBase implements OnInit
   private traktService = inject(TraktService);
   private servicesService = inject(ServicesService);
   private sonarrService = inject(SonarrService);
+  private detailsModalService = inject(DetailsModalService);
 
   shows = signal<TraktShow[]>([]);
   libraryIds = signal<Set<number>>(new Set());
-
-  // Modal State
-  selectedTraktId: number | null = null;
-  selectedTmdbId: number | null = null;
-  isModalOpen = false;
 
   mediaItems = computed<MediaItem[]>(() => {
     return this.shows().map(show => this.mapToMediaItem(show));
@@ -85,9 +81,12 @@ export class TraktRecommendedShowsComponent extends WidgetBase implements OnInit
   }
 
   openDetails(show: TraktShow) {
-    this.selectedTraktId = show.ids.trakt;
-    this.selectedTmdbId = show.ids.tmdb;
-    this.isModalOpen = true;
+    this.detailsModalService.open({
+      traktId: show.ids.trakt,
+      tmdbId: show.ids.tmdb,
+      tvdbId: show.ids.tvdb,
+      type: 'show'
+    });
   }
 
   checkLibrary() {

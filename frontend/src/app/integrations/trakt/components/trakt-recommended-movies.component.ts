@@ -2,7 +2,7 @@ import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {TraktService} from '../trakt.service';
 import {TraktMovie} from '../trakt.models';
-import {DetailsModalComponent} from '../../../components/details-modal/details-modal.component';
+import {DetailsModalService} from '../../../services/details-modal.service';
 import {RadarrService} from '../../radarr/radarr.service';
 import {ServicesService, ServiceType} from '../../../services/services';
 import {MediaItem} from '../../../shared/models/media-item.model';
@@ -13,7 +13,7 @@ import {HorizontalCardComponent} from '../../../shared/components/horizontal-car
 @Component({
   selector: 'app-trakt-recommended-movies',
   standalone: true,
-  imports: [CommonModule, HorizontalCardComponent, DetailsModalComponent],
+  imports: [CommonModule, HorizontalCardComponent],
   templateUrl: './trakt-recommended-movies.component.html',
   styles: ``
 })
@@ -22,14 +22,10 @@ export class TraktRecommendedMoviesComponent extends WidgetBase implements OnIni
   private traktService = inject(TraktService);
   private servicesService = inject(ServicesService);
   private radarrService = inject(RadarrService);
+  private detailsModalService = inject(DetailsModalService);
 
   movies = signal<TraktMovie[]>([]);
   libraryIds = signal<Set<number>>(new Set());
-
-  // Modal State
-  selectedTraktId: number | null = null;
-  selectedTmdbId: number | null = null;
-  isModalOpen = false;
 
   mediaItems = computed<MediaItem[]>(() => {
     return this.movies().map(movie => this.mapToMediaItem(movie));
@@ -84,9 +80,11 @@ export class TraktRecommendedMoviesComponent extends WidgetBase implements OnIni
   }
 
   openDetails(movie: TraktMovie) {
-    this.selectedTraktId = movie.ids.trakt;
-    this.selectedTmdbId = movie.ids.tmdb;
-    this.isModalOpen = true;
+    this.detailsModalService.open({
+      tmdbId: movie.ids.tmdb,
+      traktId: movie.ids.trakt,
+      type: 'movie'
+    });
   }
 
   checkLibrary() {

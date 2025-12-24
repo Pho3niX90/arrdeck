@@ -1,10 +1,10 @@
-import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {SonarrDataService} from '../sonarr.data.service';
 import {SonarrSeries} from '../sonarr.models';
 import {MediaItem} from '../../../shared/models/media-item.model';
 import {TimeAgoPipe} from '../../../pipes/time-ago.pipe';
-import {DetailsModalComponent} from '../../../components/details-modal/details-modal.component';
+import {DetailsModalService} from '../../../services/details-modal.service';
 
 import {TmdbImagePipe} from '../../../pipes/tmdb-image.pipe';
 
@@ -14,18 +14,17 @@ import {HorizontalCardComponent} from '../../../shared/components/horizontal-car
 @Component({
   selector: 'app-sonarr-recent',
   standalone: true,
-  imports: [CommonModule, HorizontalCardComponent, DetailsModalComponent],
+  imports: [CommonModule, HorizontalCardComponent],
   providers: [TimeAgoPipe, TmdbImagePipe],
   templateUrl: './sonarr-recent.component.html',
   styles: ``
 })
 export class SonarrRecentComponent extends WidgetBase implements OnInit {
 
-  @ViewChild(DetailsModalComponent) detailsModal!: DetailsModalComponent;
-
   private dataService = inject(SonarrDataService);
   private timeAgoPipe = inject(TimeAgoPipe);
   private tmdbImagePipe = inject(TmdbImagePipe);
+  private detailsModalService = inject(DetailsModalService);
 
   shows = signal<SonarrSeries[]>([]);
 
@@ -62,9 +61,9 @@ export class SonarrRecentComponent extends WidgetBase implements OnInit {
   }
 
   openDetails(show: SonarrSeries) {
-    this.detailsModal.type = 'show';
-    // Sonarr has tvdbId.
-    this.detailsModal.tvdbId = show.tvdbId;
-    this.detailsModal.open();
+    this.detailsModalService.open({
+      type: 'show',
+      tvdbId: show.tvdbId
+    });
   }
 }

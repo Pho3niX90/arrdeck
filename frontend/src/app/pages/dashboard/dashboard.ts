@@ -1,6 +1,7 @@
 import {Component, effect, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ServiceConfig, ServicesService, ServiceType} from '../../services/services';
+
 import {SonarrCalendarComponent} from '../../integrations/sonarr/components/sonarr-calendar.component';
 import {SonarrRecentComponent} from '../../integrations/sonarr/components/sonarr-recent.component';
 import {RadarrRecentComponent} from '../../integrations/radarr/components/radarr-recent.component';

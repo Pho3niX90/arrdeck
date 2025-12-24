@@ -9,8 +9,4 @@
     </svg>
   </div>
 
-  @if (isModalOpen) {
-    <app-details-modal [traktServiceId]="serviceId()" [traktId]="selectedTraktId!" [type]="'movie'"
-                       (close)="isModalOpen = false"></app-details-modal>
-  }
 </app-horizontal-card>
