@@ -185,7 +185,7 @@ export class AiService {
         context = `User's Library Sample (Top Rated & Recent):\n${simplifiedContext}`;
 
         const systemPrompt = `You are a movie and TV show recommendation expert.
-        Based on the user's library provided below, recommend 2-20 new ${type === 'sonarr' ? 'TV shows' : 'movies'} they might like.
+        Based on the user's library provided below, recommend 20 new ${type === 'sonarr' ? 'TV shows' : 'movies'} they might like.
         Do not recommend items already in the library.
         Provide the response in STRICT JSON format with the following structure:
         [
@@ -319,7 +319,7 @@ export class AiService {
     }
 
     private async getLibraryContext(): Promise<string> {
-        const cacheKey = 'ai:library_context';
+        const cacheKey = 'ai:library_context_v2';
         const cached = await this.cacheManager.get<string>(cacheKey);
         if (cached) return cached;
 
@@ -346,30 +346,47 @@ export class AiService {
                 Promise.all(moviePromises),
             ]);
 
-            const allSeries = seriesResults.flat();
-            const allMovies = movieResults.flat();
+            // Combine and normalize items
+            const allItems: any[] = [];
+
+            seriesResults.flat().forEach((s: any) => {
+                allItems.push({
+                    title: s.title,
+                    year: s.year,
+                    type: 'TV Show',
+                    added: new Date(s.added)
+                });
+            });
+
+            movieResults.flat().forEach((m: any) => {
+                allItems.push({
+                    title: m.title,
+                    year: m.year,
+                    type: 'Movie',
+                    added: new Date(m.added)
+                });
+            });
 
             // Deduplicate by title+year
-            const uniqueItems = new Set<string>();
-            const contextLines: string[] = [];
-
-            allSeries.forEach((s: any) => {
-                const key = `${s.title}-${s.year}`;
+            const uniqueItems = new Map<string, any>();
+            allItems.forEach(item => {
+                const key = `${item.title}-${item.year}`;
                 if (!uniqueItems.has(key)) {
-                    uniqueItems.add(key);
-                    contextLines.push(`- ${s.title} (${s.year}) [TV Show]`);
+                    uniqueItems.set(key, item);
                 }
             });
 
-            allMovies.forEach((m: any) => {
-                const key = `${m.title}-${m.year}`;
-                if (!uniqueItems.has(key)) {
-                    uniqueItems.add(key);
-                    contextLines.push(`- ${m.title} (${m.year}) [Movie]`);
-                }
-            });
+            // Sort by recently added and limit
+            const sortedItems = Array.from(uniqueItems.values())
+                .sort((a, b) => b.added.getTime() - a.added.getTime())
+                .slice(0, 1000);
 
-            const context = `User's Existing Library:\n${contextLines.join('\n')}`;
+            const movies = sortedItems.filter(i => i.type === 'Movie').map(i => `${i.title} (${i.year})`);
+            const shows = sortedItems.filter(i => i.type === 'TV Show').map(i => `${i.title} (${i.year})`);
+
+            let context = `User's Existing Library (Most Recent 1000):`;
+            if (movies.length) context += `\nMovies: ${movies.join(', ')}`;
+            if (shows.length) context += `\nTV Shows: ${shows.join(', ')}`;
             await this.cacheManager.set(cacheKey, context, 10 * 60 * 1000); // 10 mins
             return context;
         } catch (e) {
@@ -385,8 +402,6 @@ export class AiService {
         let systemPrompt = `You are ArrDeck AI, a helpful assistant for a media server.
         You can answer questions about movies and TV shows, provide recommendations, and help the user manage their library.
         Be concise and friendly.
-        
-        ${libraryContext}
         
         IMPORTANT: If you recommend specific movies or TV shows, please append a JSON block at the VERY END of your response, separated by "---".
         The JSON should be an array of objects with "title", "year" (number), "type" ("movie" or "show"), "reason" (short string).
@@ -404,7 +419,7 @@ export class AiService {
             .map((msg) => `${msg.role === 'user' ? 'User' : 'Model'}: ${msg.content}`)
             .join('\n');
 
-        const fullPrompt = `${systemPrompt}\n\nChat History:\n${chatContext}\n\nUser: ${prompt}\nModel:`;
+        const fullPrompt = `${systemPrompt}\n\n${libraryContext}\n\nChat History:\n${chatContext}\n\nUser: ${prompt}\nModel:`;
 
         if (config.provider === 'ollama') {
             const response = await this.callOllama(fullPrompt, config);
@@ -467,12 +482,29 @@ export class AiService {
                 tools: [tools],
             });
 
+            // Inject library context as the first history item instead of system instruction
+            const initialHistory = [
+                {
+                    role: 'user',
+                    parts: [{text: libraryContext}]
+                },
+                {
+                    role: 'model',
+                    parts: [{text: "Understood. I have reviewed your library and am ready to help."}]
+                }
+            ];
+
+            const mappedHistory = history.map((h) => ({
+                role: h.role === 'user' ? 'user' : 'model',
+                parts: [{text: h.content}],
+            }));
+
             const chatSession = model.startChat({
-                history: history.map((h) => ({
-                    role: h.role === 'user' ? 'user' : 'model',
-                    parts: [{text: h.content}],
-                })),
-                systemInstruction: systemPrompt,
+                history: [...initialHistory, ...mappedHistory],
+                systemInstruction: {
+                    role: 'system',
+                    parts: [{text: systemPrompt}]
+                },
             });
 
             let result = await chatSession.sendMessage(prompt);
