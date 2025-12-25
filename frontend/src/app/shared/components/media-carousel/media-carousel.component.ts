@@ -37,9 +37,11 @@ export class MediaCarouselComponent implements AfterViewInit, OnDestroy {
   private animationFrameId: number | null = null;
   private isPaused = false;
   private scrollAmount = 0.5;
+  private autoScroll = false;
 
   ngAfterViewInit() {
-    this.startScroll();
+    if (this.autoScroll)
+      this.startScroll();
   }
 
   ngOnDestroy() {
