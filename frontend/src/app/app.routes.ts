@@ -1,12 +1,14 @@
-import { Routes } from '@angular/router';
-import { Login } from './pages/login/login';
-import { Layout } from './components/layout/layout';
-import { authGuard } from './auth.guard';
+import {Routes} from '@angular/router';
+import {Login} from './pages/login/login';
+import {Layout} from './components/layout/layout';
+import {authGuard} from './auth.guard';
+import {guestGuard} from './guest.guard';
 
 export const routes: Routes = [
   {
     path: 'login',
-    component: Login
+    component: Login,
+    canActivate: [guestGuard]
   },
   {
     path: '',
@@ -39,5 +41,5 @@ export const routes: Routes = [
       }
     ]
   },
-  { path: '**', redirectTo: '' }
+  {path: '**', redirectTo: ''}
 ];
