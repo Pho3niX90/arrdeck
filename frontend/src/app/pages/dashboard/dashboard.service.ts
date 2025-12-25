@@ -62,9 +62,6 @@ export class DashboardService {
         } catch (e) {
           console.error('Failed to parse dashboard config from user profile', e);
         }
-      } else if (user && !user.dashboardConfig) {
-        // If user logged in but no config yet, maybe load default or legacy local?
-        this.loadLocalLegacy();
       }
     });
 
@@ -127,19 +124,5 @@ export class DashboardService {
     }).subscribe({
       error: (err: unknown) => console.error('Failed to save dashboard layout', err)
     });
-  }
-
-  loadLocalLegacy() {
-    const stored = localStorage.getItem('arrdeck_dashboard_layout_v2');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          this.widgets.set(parsed);
-        }
-      } catch (e) {
-        console.error('Failed to parse dashboard layout', e);
-      }
-    }
   }
 }

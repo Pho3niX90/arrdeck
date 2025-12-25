@@ -128,8 +128,8 @@ export class Dashboard implements OnInit {
     defaultItemCols: 1,
     defaultItemRows: 1,
     fixedColWidth: 320,
-    fixedRowHeight: 360,
-    keepFixedHeightInMobile: false,
+    fixedRowHeight: 375,
+    keepFixedHeightInMobile: true,
     keepFixedWidthInMobile: false,
     scrollSensitivity: 10,
     scrollSpeed: 20,
@@ -157,10 +157,11 @@ export class Dashboard implements OnInit {
   };
 
   constructor() {
-    this.servicesService.getServices().subscribe(data => {
-      this.services.set(data);
-      this.initializeDefaultWidgets(data);
-    });
+    this.servicesService.getServices()
+      .subscribe(data => {
+        this.services.set(data);
+        this.initializeDefaultWidgets(data);
+      });
 
     effect(() => {
       const edit = this.dashboardService.editMode();
