@@ -23,6 +23,7 @@ import {MediaItem} from '../../models/media-item.model';
       display: block;
       height: 100%;
       min-height: 0;
+      position: relative;
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -30,6 +31,7 @@ import {MediaItem} from '../../models/media-item.model';
 export class MediaCarouselComponent implements AfterViewInit, OnDestroy {
   items = input.required<MediaItem[]>();
   rows = input(1);
+  autoScroll = input(false);
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLElement>;
 
@@ -39,7 +41,9 @@ export class MediaCarouselComponent implements AfterViewInit, OnDestroy {
   private scrollAmount = 0.5;
 
   ngAfterViewInit() {
-    this.startScroll();
+    if (this.autoScroll()) {
+      this.startScroll();
+    }
   }
 
   ngOnDestroy() {
@@ -78,5 +82,21 @@ export class MediaCarouselComponent implements AfterViewInit, OnDestroy {
 
   resume() {
     this.isPaused = false;
+  }
+
+  scrollLeft() {
+    if (this.scrollContainer && this.scrollContainer.nativeElement) {
+      const el = this.scrollContainer.nativeElement;
+      const scrollAmount = el.clientWidth * 0.8; // Scroll 80% of the width
+      el.scrollBy({left: -scrollAmount, behavior: 'smooth'});
+    }
+  }
+
+  scrollRight() {
+    if (this.scrollContainer && this.scrollContainer.nativeElement) {
+      const el = this.scrollContainer.nativeElement;
+      const scrollAmount = el.clientWidth * 0.8; // Scroll 80% of the width
+      el.scrollBy({left: scrollAmount, behavior: 'smooth'});
+    }
   }
 }

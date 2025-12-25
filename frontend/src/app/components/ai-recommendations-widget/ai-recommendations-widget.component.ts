@@ -12,7 +12,6 @@ import {forkJoin, of} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {TmdbImagePipe} from '../../pipes/tmdb-image.pipe';
 import {DetailsModalService} from '../../services/details-modal.service';
-
 import {WidgetBase} from '../../shared/base/widget-base';
 
 interface EnrichedRecommendation {
@@ -25,6 +24,7 @@ interface EnrichedRecommendation {
   added?: boolean;
   monitored?: boolean;
   tvdbId?: number;
+  ratings?: any;
 }
 
 @Component({
@@ -38,10 +38,6 @@ interface EnrichedRecommendation {
 export class AiRecommendationsWidgetComponent extends WidgetBase implements OnInit {
   type = input.required<'sonarr' | 'radarr'>();
 
-  ngOnInit() {
-    this.generate();
-  }
-
   private aiService = inject(AiRecommendationsService);
   private sonarrService = inject(SonarrService);
   private radarrService = inject(RadarrService);
@@ -50,33 +46,55 @@ export class AiRecommendationsWidgetComponent extends WidgetBase implements OnIn
   private detailsModalService = inject(DetailsModalService);
 
   recommendations = signal<EnrichedRecommendation[]>([]);
-
-  mediaItems = computed<MediaItem[]>(() => {
-    return this.recommendations().map(item => ({
-      id: item.tmdbId || item.title,
-      title: item.title,
-      subtitle: item.year?.toString(),
-      imageUrl: this.tmdbImagePipe.transform(item.remotePoster, 'w185'),
-      clickAction: () => this.openDetails(item),
-      accentColor: 'text-purple-400',
-
-      topLeftBadge: item.added ? {
-        iconHtml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-2.5 h-2.5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg>',
-        colorClass: 'bg-green-500/80 text-white'
-      } : undefined,
-
-      topRightBadge: {
-        text: 'AI',
-        colorClass: 'bg-purple-600/80 text-white font-bold text-[10px]'
-      }
-    }));
-  });
-
   loading = signal(false);
   enriching = signal(false);
   error = signal<string | null>(null);
   customPrompt = signal('');
   showPromptInput = signal(false);
+
+  mediaItems = computed<MediaItem[]>(() => {
+    return this.recommendations().map(item => {
+      const rating = item.ratings?.tmdb?.value || item.ratings?.imdb?.value;
+
+      return {
+        id: item.tmdbId || item.title,
+        title: item.title,
+        subtitle: item.reason,
+        imageUrl: this.tmdbImagePipe.transform(item.remotePoster, 'w185'),
+        clickAction: () => this.openDetails(item),
+        accentColor: 'text-purple-400',
+
+        // Top Left: Library Status
+        topLeftBadge: item.added ? {
+          iconHtml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-2.5 h-2.5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg>',
+          colorClass: 'bg-green-500/80 text-white'
+        } : undefined,
+
+        // Top Right: Rating
+        topRightBadge: rating ? {
+          text: rating.toFixed(1),
+          iconHtml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-2.5 h-2.5"><path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401Z" clip-rule="evenodd" /></svg>',
+          colorClass: 'bg-amber-500/80 text-white'
+        } : undefined,
+
+        // Bottom Left: Source
+        bottomLeftBadge: {
+          text: 'AI',
+          colorClass: 'bg-purple-600/80 text-white font-bold text-[10px]'
+        },
+
+        // Bottom Center: Year
+        bottomCenterOverlay: item.year ? {
+          text: item.year.toString(),
+          location: 'bottom'
+        } : undefined
+      };
+    });
+  });
+
+  ngOnInit() {
+    this.generate();
+  }
 
   generate(force = false) {
     this.loading.set(true);
@@ -119,7 +137,8 @@ export class AiRecommendationsWidgetComponent extends WidgetBase implements OnIn
             remotePoster: match?.remotePoster || match?.images?.find((img: any) => img.coverType === 'poster')?.url,
             added: !!(match?.id && match.id > 0),
             monitored: match?.monitored,
-            tmdbId: match?.tmdbId || item.tmdbId
+            tmdbId: match?.tmdbId || item.tmdbId,
+            ratings: match?.ratings
           };
         }),
         catchError(() => of(item))

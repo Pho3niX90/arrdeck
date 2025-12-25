@@ -46,16 +46,24 @@ export class TraktRecommendedMoviesComponent extends WidgetBase implements OnIni
       imageUrl: this.getPoster(movie),
       accentColor: 'text-amber-400',
       clickAction: () => this.openDetails(movie),
-      topRightBadge: undefined,
+      topRightBadge: movie.rating ? {
+        text: movie.rating.toFixed(1),
+        iconHtml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-2.5 h-2.5"><path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401Z" clip-rule="evenodd" /></svg>',
+        colorClass: 'bg-amber-500/80 text-white'
+      } : undefined,
+      bottomLeftBadge: {
+        text: 'Trakt',
+        colorClass: 'bg-red-600/80 text-white font-bold text-[10px]'
+      },
+      bottomCenterOverlay: movie.year ? {
+        text: movie.year.toString(),
+        location: 'bottom'
+      } : undefined,
       topLeftBadge: this.isInLibrary(movie) ? {
         text: undefined,
         iconHtml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-2.5 h-2.5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg>',
         colorClass: 'bg-green-500/80 text-white'
-      } : undefined,
-      bottomOverlay: {
-        location: 'center',
-        text: movie.rating ? `★ ${(movie.rating * 10).toFixed(0)}%` : undefined
-      }
+      } : undefined
     };
   }
 
