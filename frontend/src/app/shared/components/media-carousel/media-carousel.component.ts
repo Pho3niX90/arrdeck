@@ -30,6 +30,7 @@ import {MediaItem} from '../../models/media-item.model';
 export class MediaCarouselComponent implements AfterViewInit, OnDestroy {
   items = input.required<MediaItem[]>();
   rows = input(1);
+  autoScroll = input(false);
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLElement>;
 
@@ -37,10 +38,9 @@ export class MediaCarouselComponent implements AfterViewInit, OnDestroy {
   private animationFrameId: number | null = null;
   private isPaused = false;
   private scrollAmount = 0.5;
-  private autoScroll = false;
 
   ngAfterViewInit() {
-    if (this.autoScroll)
+    if (this.autoScroll())
       this.startScroll();
   }
 
