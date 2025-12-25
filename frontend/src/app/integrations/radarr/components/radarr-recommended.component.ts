@@ -23,7 +23,7 @@ export class RadarrRecommendedComponent implements OnInit {
       const allMovies = this.dataService.getMoviesForService(this.serviceId);
       const sorted = allMovies
         .filter(m => m.hasFile) // Only show movies we actually have
-        .sort((a, b) => b.ratings.value - a.ratings.value);
+        .sort((a, b) => b.ratings.tmdb.value - a.ratings.tmdb.value);
 
       this.movies.set(sorted.slice(0, 10));
     });

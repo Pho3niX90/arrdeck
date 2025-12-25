@@ -23,6 +23,7 @@ import {MediaItem} from '../../models/media-item.model';
       display: block;
       height: 100%;
       min-height: 0;
+      position: relative;
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -81,5 +82,21 @@ export class MediaCarouselComponent implements AfterViewInit, OnDestroy {
 
   resume() {
     this.isPaused = false;
+  }
+
+  scrollLeft() {
+    if (this.scrollContainer && this.scrollContainer.nativeElement) {
+      const el = this.scrollContainer.nativeElement;
+      const scrollAmount = el.clientWidth * 0.8; // Scroll 80% of the width
+      el.scrollBy({left: -scrollAmount, behavior: 'smooth'});
+    }
+  }
+
+  scrollRight() {
+    if (this.scrollContainer && this.scrollContainer.nativeElement) {
+      const el = this.scrollContainer.nativeElement;
+      const scrollAmount = el.clientWidth * 0.8; // Scroll 80% of the width
+      el.scrollBy({left: scrollAmount, behavior: 'smooth'});
+    }
   }
 }

@@ -52,9 +52,18 @@ export interface SonarrSeason {
   };
 }
 
-export interface SonarrRatings {
+export interface SonarrRatingItem {
   votes: number;
   value: number;
+  type: string;
+}
+
+export interface SonarrRatings {
+  imdb?: SonarrRatingItem;
+  tmdb?: SonarrRatingItem;
+  trakt?: SonarrRatingItem;
+  value?: number;
+  votes?: number;
 }
 
 export interface SonarrEpisode {

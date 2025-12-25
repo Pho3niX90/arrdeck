@@ -18,8 +18,20 @@ export class AuthService {
   readonly currentUser = signal<any>(null);
 
   constructor(private http: HttpClient, private router: Router) {
-    if (this._token()) {
+    if (this._token() && this.isTokenValid(this._token()!)) {
       this.refreshProfile();
+    } else {
+      this.logout();
+    }
+  }
+
+  private isTokenValid(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Math.floor(Date.now() / 1000);
+      return payload.exp > now;
+    } catch (e) {
+      return false;
     }
   }
 

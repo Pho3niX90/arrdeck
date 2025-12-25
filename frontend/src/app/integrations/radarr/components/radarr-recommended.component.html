@@ -13,7 +13,7 @@
       <div
         class="flex gap-4 p-3 bg-slate-800/50 rounded-2xl hover:bg-slate-800 transition group/item border border-white/5">
         <!-- Poster -->
-        <div class="w-16 aspect-[2/3] relative rounded-lg overflow-hidden flex-shrink-0 bg-slate-900">
+        <div class="w-16 aspect-2/3 relative rounded-lg overflow-hidden shrink-0 bg-slate-900">
           <img [ngSrc]="getPoster(movie) | tmdbImage:'w185':'poster'" width="64" height="96"
                class="w-full h-full object-cover" alt="{{ movie.title }}"/>
         </div>
@@ -25,7 +25,7 @@
           <div class="flex items-center gap-2 mt-1">
                     <span
                       class="text-xs font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/10">
-                        {{ movie.ratings.value }}
+                        {{ movie.ratings.tmdb.value }}
                     </span>
             <span class="text-slate-500 text-xs">{{ movie.year }}</span>
             @if (movie.genres.length) {

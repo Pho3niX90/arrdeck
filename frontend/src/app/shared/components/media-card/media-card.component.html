@@ -38,19 +38,31 @@
       </div>
     }
 
-    <!-- Bottom Overlay (e.g. Time Ago) -->
-    @if (item().bottomOverlay; as overlay) {
-      @if (overlay.location === 'bottom') {
-        <div class="absolute bottom-0 inset-x-0 p-2 bg-linear-to-t from-black/90 to-transparent pt-6">
-          <div class="text-[10px] text-slate-300 font-medium truncate text-center">
-            {{ overlay.text }}
-          </div>
-        </div>
-      }
+    <!-- Bottom Left Badge (Source) -->
+    @if (item().bottomLeftBadge; as badge) {
+      <div
+        class="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded-md backdrop-blur-sm text-[10px] font-bold border border-white/10 flex items-center gap-1 shadow-sm"
+        [class]="badge.colorClass || 'bg-black/70 text-white'">
+        @if (badge.iconHtml) {
+          <span [innerHTML]="badge.iconHtml | safeHtml" class="w-2.5 h-2.5 flex items-center justify-center"></span>
+        }
+        @if (badge.text) {
+          <span>{{ badge.text }}</span>
+        }
+      </div>
     }
 
-    <!-- Source Icons (Recommendations) -->
-    @if (item().sourceIcons; as icons) {
+    <!-- Bottom Center Overlay (Year/Time Ago) -->
+    @if (item().bottomCenterOverlay; as overlay) {
+      <div class="absolute bottom-0 inset-x-0 p-2 bg-linear-to-t from-black/90 to-transparent pt-6 pointer-events-none">
+        <div class="text-[10px] text-slate-300 font-medium truncate text-center">
+          {{ overlay.text }}
+        </div>
+      </div>
+    }
+
+    <!-- Legacy Source Icons (Recommendations) - Keeping as fallback if needed, but standardization prefers Bottom Left Badge -->
+    @if (!item().bottomLeftBadge && item().sourceIcons; as icons) {
       <div class="absolute bottom-1.5 left-1.5 flex items-center -space-x-1.5 pointer-events-none">
         @for (icon of icons; track $index) {
           <div [innerHTML]="icon.html | safeHtml" [title]="icon.title"

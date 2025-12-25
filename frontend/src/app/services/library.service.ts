@@ -52,7 +52,7 @@ export class LibraryService {
         const service = services.find(s => s.type === targetType);
 
         if (!service) {
-          return of({ inLibrary: false });
+          return of({inLibrary: false});
         }
 
         const term = `tmdb:${tmdbId}`;
@@ -61,7 +61,7 @@ export class LibraryService {
           return this.radarrService.lookup(service.id!, term).pipe(
             map(results => {
               const match = results.find(m => m.tmdbId === tmdbId);
-              if (!match) return { inLibrary: false };
+              if (!match) return {inLibrary: false};
 
               return {
                 inLibrary: !!match.id,
@@ -79,7 +79,7 @@ export class LibraryService {
                 ((s as any).tmdbId === tmdbId)
               );
 
-              if (!match || !match.id) return of({ inLibrary: false });
+              if (!match || !match.id) return of({inLibrary: false});
 
               return this.sonarrService.getEpisodes(service.id!, match.id).pipe(
                 map(episodes => {
@@ -185,7 +185,7 @@ export class LibraryService {
                 overview: m.overview,
                 tmdbId: m.tmdbId,
                 posterUrl: m.images?.find((i: any) => i.coverType === 'poster')?.remoteUrl,
-                rating: m.ratings?.value || 0,
+                rating: m.ratings?.tmdb?.value || m.ratings?.imdb?.value || 0,
                 runtime: m.runtime,
                 added: new Date(m.added),
                 status: m.status,
@@ -204,7 +204,7 @@ export class LibraryService {
                 tmdbId: (s as any).tmdbId || 0,
                 tvdbId: (s as any).tvdbId,
                 posterUrl: s.images?.find((i: any) => i.coverType === 'poster')?.remoteUrl,
-                rating: s.ratings?.value || 0,
+                rating: s.ratings?.tmdb?.value || s.ratings?.imdb?.value || s.ratings?.value || 0,
                 seasons: s.seasonCount, // Assuming SonarrSeries has seasonCount or similar, need to verify
                 added: new Date(s.added),
                 status: s.status,

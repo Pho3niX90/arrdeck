@@ -1,11 +1,32 @@
 <div #scrollContainer class="flex-1 p-4 flex gap-4 min-h-0 h-full" [class.overflow-x-auto]="rows() === 1"
      [class.scrollbar-hide]="rows() === 1" [class.items-start]="rows() === 1" [class.flex-nowrap]="rows() === 1"
      [class.flex-wrap]="rows() > 1" [class.overflow-y-auto]="rows() > 1" [class.content-start]="rows() > 1"
-     (mouseenter)="pause()" (mouseleave)="resume()" (touchstart)="pause()"
-     (touchend)="resume()">
+     (mouseenter)="pause()" (mouseleave)="resume()" (touchstart)="pause()" (touchend)="resume()">
 
   @for (item of items(); track item.id) {
     <app-media-card [item]="item"></app-media-card>
   }
 
 </div>
+
+<!-- Previous Button (Desktop) -->
+@if (rows() === 1) {
+  <button (click)="scrollLeft()"
+          class="hidden md:flex absolute left-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition shadow-lg backdrop-blur-sm -ml-4 opacity-0 group-hover:opacity-100 focus:opacity-100"
+          aria-label="Previous">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+  </button>
+
+  <!-- Next Button (Desktop) -->
+  <button (click)="scrollRight()"
+          class="hidden md:flex absolute right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition shadow-lg backdrop-blur-sm -mr-4 opacity-0 group-hover:opacity-100 focus:opacity-100"
+          aria-label="Next">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </button>
+}

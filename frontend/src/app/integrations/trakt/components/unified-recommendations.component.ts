@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {Observable, of} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 import {DetailsModalService} from '../../../services/details-modal.service';
-import {MediaItem, MediaSourceIcon} from '../../../shared/models/media-item.model';
+import {MediaItem} from '../../../shared/models/media-item.model';
 import {TraktService} from '../trakt.service';
 import {RadarrDataService} from '../../radarr/radarr.data.service';
 import {SonarrDataService} from '../../sonarr/sonarr.data.service';
@@ -20,6 +20,7 @@ interface UnifiedItem {
   sources: Set<string>;
   added: Date;
   inLibrary: boolean;
+  rating?: number;
   rawItem?: any;
 }
 
@@ -162,6 +163,7 @@ export class UnifiedRecommendationsComponent extends WidgetBase implements OnIni
             sources: new Set(['Trakt']),
             added: new Date(),
             inLibrary: false,
+            rating: item.rating ? item.rating * 1 : undefined, // Ensure number
             rawItem: raw
           });
         } else {
@@ -194,6 +196,7 @@ export class UnifiedRecommendationsComponent extends WidgetBase implements OnIni
             sources: new Set([this.type === 'movie' ? 'Radarr' : 'Sonarr']),
             added: new Date(),
             inLibrary: false,
+            rating: item.ratings?.tmdb?.value || item.ratings?.imdb?.value,
             rawItem: item
           });
         } else {
@@ -208,23 +211,25 @@ export class UnifiedRecommendationsComponent extends WidgetBase implements OnIni
   }
 
   mapToMediaItem(item: UnifiedItem): MediaItem {
-    const icons: MediaSourceIcon[] = [];
-    if (item.sources.has('Trakt')) {
-      icons.push({html: this.getTraktIcon(), title: 'Recommended by Trakt'});
-    }
-    if (item.sources.has('Radarr')) {
-      icons.push({html: this.getRadarrIcon(), title: 'Recommended by Radarr'});
-    }
-    if (item.sources.has('Sonarr')) {
-      icons.push({html: this.getSonarrIcon(), title: 'Recommended by Sonarr'});
+    let badgeText = 'Trakt';
+    let badgeColor = 'bg-red-600/80 text-white';
+
+    if (item.sources.has('Radarr') && !item.sources.has('Trakt')) {
+      badgeText = 'Radarr';
+      badgeColor = 'bg-amber-600/80 text-white';
+    } else if (item.sources.has('Sonarr') && !item.sources.has('Trakt')) {
+      badgeText = 'Sonarr';
+      badgeColor = 'bg-emerald-600/80 text-white';
+    } else if (item.sources.size > 1) {
+      badgeText = 'Multi';
+      badgeColor = 'bg-blue-600/80 text-white';
     }
 
     return {
       id: item.ids.tmdb || item.ids.tvdb || 0,
       title: item.title,
-      subtitle: item.year?.toString(),
+      subtitle: item.year?.toString(), // Keeping as subtitle? Plan said Bottom Center.
       imageUrl: this.tmdbImagePipe.transform(this.ensureProtocol(item.poster), 'w190'),
-      sourceIcons: icons,
       clickAction: () => {
         this.detailsModalService.open({
           type: this.type,
@@ -233,7 +238,20 @@ export class UnifiedRecommendationsComponent extends WidgetBase implements OnIni
           tvdbId: item.ids.tvdb
         });
       },
-      accentColor: this.type === 'movie' ? 'text-amber-400' : 'text-emerald-400'
+      accentColor: this.type === 'movie' ? 'text-amber-400' : 'text-emerald-400',
+      bottomLeftBadge: {
+        text: badgeText,
+        colorClass: badgeColor + ' font-bold text-[10px]'
+      },
+      topRightBadge: item.rating ? {
+        text: item.rating.toFixed(1),
+        iconHtml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-2.5 h-2.5"><path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401Z" clip-rule="evenodd" /></svg>',
+        colorClass: 'bg-amber-500/80 text-white'
+      } : undefined,
+      bottomCenterOverlay: item.year ? {
+        text: item.year.toString(),
+        location: 'bottom'
+      } : undefined
     };
   }
 
